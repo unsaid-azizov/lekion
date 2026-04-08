@@ -8,7 +8,7 @@ import type { User } from "@/types";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  googleLogin: (credential: string, referralCode?: string) => Promise<void>;
+  googleLogin: (credential: string, referralCode?: string) => Promise<User>;
   logout: () => void;
   refetch: () => Promise<void>;
 }

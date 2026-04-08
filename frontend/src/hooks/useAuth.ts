@@ -28,13 +28,15 @@ export function useAuth() {
     fetchUser();
   }, [fetchUser]);
 
-  const googleLogin = async (credential: string, referralCode?: string) => {
+  const googleLogin = async (credential: string, referralCode?: string): Promise<User> => {
     const data = await api<{ access_token: string }>("/auth/google", {
       method: "POST",
       body: JSON.stringify({ credential, referral_code: referralCode || null }),
     });
     setToken(data.access_token);
-    await fetchUser();
+    const u = await api<User>("/users/me");
+    setUser(u);
+    return u;
   };
 
   const logout = () => {

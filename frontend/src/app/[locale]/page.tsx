@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/providers";
@@ -20,6 +21,7 @@ type ViewTab = "people" | "businesses" | "map";
 export default function HomePage() {
   const t = useTranslations();
   const locale = useLocale();
+  const router = useRouter();
   const { user, loading, googleLogin } = useAuthContext();
   const { prompt: googlePrompt } = useGoogleAuth(async (credential) => {
     try {
@@ -111,6 +113,27 @@ export default function HomePage() {
   }, [mapWidth]);
 
   if (loading) return null;
+
+  if (user && user.status !== "approved") {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-3rem)]">
+        <div className="text-center px-4 max-w-md">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold mb-2">{t("pending.title")}</h2>
+          <p className="text-muted-foreground text-sm mb-6">{t("pending.message")}</p>
+          {(!user.bio || !user.profession || !user.city) ? (
+            <Button onClick={() => router.push("/onboarding")}>{t("pending.completeProfile")}</Button>
+          ) : (
+            <Button variant="outline" onClick={() => router.push("/profile")}>{t("pending.viewProfile")}</Button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     const subtitle = locale === "ru"

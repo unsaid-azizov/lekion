@@ -24,6 +24,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [superuserId, setSuperuserId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     const params = new URLSearchParams();
@@ -34,13 +35,17 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
+    api<{ user_id: string }>("/admin/superuser").then((d) => setSuperuserId(d.user_id));
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(fetchUsers, 300);
     return () => clearTimeout(timer);
   }, [query, statusFilter]);
 
   const ban = async (id: string) => {
     await api(`/admin/users/${id}/ban`, { method: "POST" });
-    toast.success("Banned");
+    toast.success("Заблокирован");
     fetchUsers();
   };
 
@@ -56,7 +61,7 @@ export default function AdminUsersPage() {
 
   const approve = async (id: string) => {
     await api(`/admin/users/${id}/approve`, { method: "POST" });
-    toast.success("Approved");
+    toast.success("Одобрен");
     fetchUsers();
   };
 
@@ -78,37 +83,47 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="border rounded-lg divide-y">
-        {users.map((user) => (
-          <div key={user.id} className="flex items-center justify-between p-3">
-            <Link href={`/profile/${user.id}`} className="flex-1">
-              <p className="font-medium">{user.first_name} {user.last_name}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Badge variant={user.status === "approved" ? "default" : "secondary"}>
-                {user.status}
-              </Badge>
-              {user.role === "admin" && <Badge variant="outline">admin</Badge>}
-              {user.status === "pending" && (
-                <Button size="sm" onClick={() => approve(user.id)}>
-                  {t("approve")}
-                </Button>
-              )}
-              <Button
-                size="sm"
-                variant={user.role === "admin" ? "secondary" : "outline"}
-                onClick={() => toggleRole(user.id, user.role)}
-              >
-                {user.role === "admin" ? "Снять админа" : "Сделать админом"}
-              </Button>
-              {user.status !== "banned" && (
-                <Button size="sm" variant="destructive" onClick={() => ban(user.id)}>
-                  {t("ban")}
-                </Button>
-              )}
+        {users.map((user) => {
+          const isSuperuser = user.id === superuserId;
+          return (
+            <div key={user.id} className="flex items-center justify-between p-3">
+              <Link href={`/profile/${user.id}`} className="flex-1">
+                <p className="font-medium">
+                  {user.first_name} {user.last_name}
+                  {isSuperuser && <span className="ml-2 text-xs text-primary font-normal">superuser</span>}
+                </p>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
+              </Link>
+              <div className="flex items-center gap-2">
+                <Badge variant={user.status === "approved" ? "default" : "secondary"}>
+                  {user.status}
+                </Badge>
+                {user.role === "admin" && <Badge variant="outline">admin</Badge>}
+                {!isSuperuser && (
+                  <>
+                    {user.status === "pending" && (
+                      <Button size="sm" onClick={() => approve(user.id)}>
+                        {t("approve")}
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant={user.role === "admin" ? "secondary" : "outline"}
+                      onClick={() => toggleRole(user.id, user.role)}
+                    >
+                      {user.role === "admin" ? "Снять админа" : "Сделать админом"}
+                    </Button>
+                    {user.status !== "banned" && (
+                      <Button size="sm" variant="destructive" onClick={() => ban(user.id)}>
+                        {t("ban")}
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

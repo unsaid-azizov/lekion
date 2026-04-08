@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import require_admin
+from app.core.deps import is_superuser, require_admin
 from app.database import get_db
 from app.models.business import Business
 from app.models.review import Review
@@ -63,6 +63,8 @@ async def reject_user(
     _: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    if await is_superuser(user_id, db):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Cannot modify superuser")
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
@@ -78,6 +80,8 @@ async def ban_user(
     _: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    if await is_superuser(user_id, db):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Cannot modify superuser")
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
@@ -94,6 +98,8 @@ async def change_role(
     _: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    if await is_superuser(user_id, db):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Cannot modify superuser")
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
@@ -152,6 +158,17 @@ async def admin_delete_review(
     await db.delete(review)
     await db.commit()
     return {"ok": True}
+
+
+@router.get("/superuser")
+async def get_superuser_id(
+    _: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(User.id).order_by(User.created_at.asc()).limit(1)
+    )
+    return {"user_id": result.scalar_one_or_none()}
 
 
 @router.get("/stats")

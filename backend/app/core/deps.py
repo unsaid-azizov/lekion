@@ -45,3 +45,12 @@ async def require_admin(user: User = Depends(get_current_user)) -> User:
     if user.role != "admin":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin access required")
     return user
+
+
+async def is_superuser(user_id: uuid.UUID, db: AsyncSession) -> bool:
+    """First registered user is the superuser."""
+    result = await db.execute(
+        select(User.id).order_by(User.created_at.asc()).limit(1)
+    )
+    first_id = result.scalar_one_or_none()
+    return first_id == user_id

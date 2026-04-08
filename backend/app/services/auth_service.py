@@ -58,6 +58,10 @@ async def register_google_user(
     if referral_code:
         inviter = await check_referral_code(db, referral_code)
 
+    # First user becomes superuser (admin + approved)
+    user_count = await db.execute(select(func.count()).select_from(User))
+    is_first = user_count.scalar() == 0
+
     user = User(
         email=email,
         google_id=google_id,
@@ -66,6 +70,8 @@ async def register_google_user(
         referral_code=generate_referral_code(),
         referred_by=inviter.id if inviter else None,
         email_verified=True,
+        role="admin" if is_first else "user",
+        status="approved" if is_first else "pending",
     )
     db.add(user)
 

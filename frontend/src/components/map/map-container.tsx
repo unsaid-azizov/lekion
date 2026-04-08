@@ -70,7 +70,7 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
         }),
       };
 
-      const map = L.map(containerRef.current, { zoomControl: false, attributionControl: false }).setView([42.0, 47.5], 8);
+      const map = L.map(containerRef.current, { zoomControl: false, attributionControl: false }).setView([55.75, 37.62], 10);
       const isDark = document.documentElement.classList.contains("dark");
 
       const tile = L.tileLayer(isDark ? TILES.dark : TILES.light, { maxZoom: 19 }).addTo(map);

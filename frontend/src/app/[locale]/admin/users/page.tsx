@@ -44,6 +44,22 @@ export default function AdminUsersPage() {
     fetchUsers();
   };
 
+  const toggleRole = async (id: string, currentRole: string) => {
+    const newRole = currentRole === "admin" ? "user" : "admin";
+    await api(`/admin/users/${id}/role`, {
+      method: "PUT",
+      body: JSON.stringify({ role: newRole }),
+    });
+    toast.success(newRole === "admin" ? "Назначен админом" : "Снят с админа");
+    fetchUsers();
+  };
+
+  const approve = async (id: string) => {
+    await api(`/admin/users/${id}/approve`, { method: "POST" });
+    toast.success("Approved");
+    fetchUsers();
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-4">
       <h1 className="text-2xl font-bold">{t("allUsers")}</h1>
@@ -73,6 +89,18 @@ export default function AdminUsersPage() {
                 {user.status}
               </Badge>
               {user.role === "admin" && <Badge variant="outline">admin</Badge>}
+              {user.status === "pending" && (
+                <Button size="sm" onClick={() => approve(user.id)}>
+                  {t("approve")}
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant={user.role === "admin" ? "secondary" : "outline"}
+                onClick={() => toggleRole(user.id, user.role)}
+              >
+                {user.role === "admin" ? "Снять админа" : "Сделать админом"}
+              </Button>
               {user.status !== "banned" && (
                 <Button size="sm" variant="destructive" onClick={() => ban(user.id)}>
                   {t("ban")}

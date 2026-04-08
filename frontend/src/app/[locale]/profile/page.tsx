@@ -32,6 +32,8 @@ export default function ProfilePage() {
       bio: user.bio || "",
       city: user.city || "",
       country: user.country || "",
+      latitude: user.latitude,
+      longitude: user.longitude,
     });
     setEditing(true);
   };
@@ -120,7 +122,7 @@ export default function ProfilePage() {
                 <Label className="text-xs text-muted-foreground">{t("profile.city")}</Label>
                 <AddressInput
                   value={[form.city, form.country].filter(Boolean).join(", ")}
-                  onChange={(data: AddressData) => setForm((prev) => ({ ...prev, city: data.city, country: data.country }))}
+                  onChange={(data: AddressData) => setForm((prev) => ({ ...prev, city: data.city, country: data.country, latitude: data.latitude, longitude: data.longitude }))}
                   placeholder="Москва, Дубай, Берлин..."
                   className="h-9 text-sm"
                 />

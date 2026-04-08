@@ -1,0 +1,118 @@
+{
+  "common": {
+    "search": "Search",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "notFound": "Not found",
+    "back": "Back",
+    "submit": "Submit",
+    "people": "People",
+    "businesses": "Businesses",
+    "all": "All",
+    "noResults": "Nothing found",
+    "noResultsHint": "Try a different search or remove filters",
+    "noPeople": "No members yet",
+    "noPeopleHint": "Invite Lezgin professionals — the directory grows thanks to you",
+    "noBusinesses": "No businesses yet",
+    "noBusinessesHint": "Add your business or invite fellow entrepreneurs",
+    "invitePeople": "Invite people"
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "loginWithGoogle": "Sign in with Google",
+    "invalidReferral": "Invalid invite link",
+    "referralExpired": "Invite limit reached",
+    "noAccount": "Don't have an account?",
+    "requestAccess": "Submit a request and an admin will review it",
+    "loginSubtitle": "Sign in to continue",
+    "invitedBy": "Invited by {name}",
+    "signIn": "Sign in",
+    "continueWithGoogle": "Continue with Google",
+    "loading": "Loading..."
+  },
+  "profile": {
+    "myProfile": "My Profile",
+    "editProfile": "Edit Profile",
+    "profession": "Profession",
+    "bio": "About",
+    "city": "City",
+    "country": "Country",
+    "contacts": "Contacts",
+    "myBusinesses": "My Businesses",
+    "uploadPhoto": "Upload photo"
+  },
+  "business": {
+    "addBusiness": "Add Business",
+    "editBusiness": "Edit",
+    "name": "Name",
+    "description": "Description",
+    "category": "Category",
+    "tags": "Tags",
+    "address": "Address",
+    "workingHours": "Working Hours",
+    "photos": "Photos",
+    "reviews": "Reviews",
+    "noReviews": "No reviews yet",
+    "city": "City",
+    "country": "Country",
+    "clickMapToSetLocation": "Click the map to set location",
+    "categoryPlaceholder": "Select a category",
+    "tagsPlaceholder": "cafe, delivery, halal"
+  },
+  "review": {
+    "writeReview": "Write a Review",
+    "yourRating": "Your rating",
+    "comment": "Comment",
+    "ownerReply": "Owner reply",
+    "reply": "Reply",
+    "alreadyReviewed": "You already reviewed this business"
+  },
+  "referral": {
+    "myReferrals": "My Referrals",
+    "referralLink": "Invite link",
+    "copyLink": "Copy",
+    "invitesRemaining": "Invites remaining",
+    "copied": "Copied!"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "pendingUsers": "Pending Approval",
+    "allUsers": "All Users",
+    "approve": "Approve",
+    "reject": "Reject",
+    "ban": "Ban",
+    "stats": "Statistics"
+  },
+  "pending": {
+    "title": "Pending Approval",
+    "message": "Your account is under review. We will notify you once it's approved.",
+    "fillProfile": "Complete your profile to speed up approval — the more info you provide, the faster we can review.",
+    "completeProfile": "Complete Profile",
+    "viewProfile": "View Profile"
+  },
+  "onboarding": {
+    "title": "Tell us about yourself",
+    "subtitle": "Complete your profile to submit for review",
+    "professionPlaceholder": "e.g. designer, developer, entrepreneur",
+    "bioPlaceholder": "Tell us about your work, experience, projects...",
+    "cityPlaceholder": "Moscow, Dubai, Berlin...",
+    "submit": "Submit for review",
+    "note": "An admin will review your profile. This usually takes less than a day.",
+    "nameRequired": "First and last name are required",
+    "professionRequired": "Please specify your profession",
+    "bioRequired": "Please tell us about yourself",
+    "cityRequired": "Please specify your city"
+  },
+  "hero": {
+    "subtitle": "A directory of Lezgin professionals and businesses. Find experts, build connections, support your community."
+  },
+  "map": {
+    "searchPlaceholder": "Search by name, profession, business..."
+  }
+}

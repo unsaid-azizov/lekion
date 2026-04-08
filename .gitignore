@@ -1,0 +1,16 @@
+node_modules/
+.next/
+__pycache__/
+*.pyc
+.env
+.env.local
+.env.backend
+.env.frontend
+*.egg-info/
+dist/
+build/
+.venv/
+pgdata/
+redisdata/
+uploads/
+.DS_Store

@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/api/v1/auth/google/callback"
 
+    telegram_bot_token: str = ""
+    telegram_bot_username: str = ""
+
     frontend_url: str = "http://localhost:3000"
 
     upload_dir: str = "/data/uploads"

@@ -39,10 +39,21 @@ export function useAuth() {
     return u;
   };
 
+  const telegramLogin = async (tgData: Record<string, unknown>, referralCode?: string): Promise<User> => {
+    const data = await api<{ access_token: string }>("/auth/telegram", {
+      method: "POST",
+      body: JSON.stringify({ ...tgData, referral_code: referralCode || null }),
+    });
+    setToken(data.access_token);
+    const u = await api<User>("/users/me");
+    setUser(u);
+    return u;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
   };
 
-  return { user, loading, googleLogin, logout, refetch: fetchUser };
+  return { user, loading, googleLogin, telegramLogin, logout, refetch: fetchUser };
 }

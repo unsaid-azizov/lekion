@@ -33,6 +33,64 @@ async def check_referral_code(db: AsyncSession, code: str) -> User:
     return inviter
 
 
+async def _assign_role_status(db: AsyncSession) -> tuple[str, str]:
+    """First user becomes superuser (admin + approved)."""
+    user_count = await db.execute(select(func.count()).select_from(User))
+    is_first = user_count.scalar() == 0
+    return ("admin", "approved") if is_first else ("user", "pending")
+
+
+async def register_telegram_user(
+    db: AsyncSession,
+    telegram_id: int,
+    first_name: str,
+    last_name: str | None,
+    username: str | None,
+    referral_code: str | None,
+) -> tuple[User, str, str]:
+    existing = await db.execute(select(User).where(User.telegram_id == telegram_id))
+    user = existing.scalar_one_or_none()
+    if user:
+        access = create_access_token(user.id, user.role, user.status)
+        refresh = create_refresh_token(user.id, user.role, user.status)
+        return user, access, refresh
+
+    inviter = None
+    if referral_code:
+        inviter = await check_referral_code(db, referral_code)
+
+    role, status_value = await _assign_role_status(db)
+
+    user = User(
+        email=f"tg_{telegram_id}@lekion.local",
+        telegram_id=telegram_id,
+        first_name=first_name,
+        last_name=last_name or "",
+        telegram=username,
+        referral_code=generate_referral_code(),
+        referred_by=inviter.id if inviter else None,
+        email_verified=False,
+        role=role,
+        status=status_value,
+    )
+    db.add(user)
+
+    if inviter:
+        invite = ReferralInvite(
+            inviter_id=inviter.id,
+            invited_email=user.email,
+            used_by=user.id,
+            used_at=func.now(),
+        )
+        db.add(invite)
+
+    await db.flush()
+    access = create_access_token(user.id, user.role, user.status)
+    refresh = create_refresh_token(user.id, user.role, user.status)
+    await db.commit()
+    return user, access, refresh
+
+
 async def register_google_user(
     db: AsyncSession, google_id: str, email: str, first_name: str, last_name: str, referral_code: str | None
 ) -> tuple[User, str, str]:
@@ -58,9 +116,7 @@ async def register_google_user(
     if referral_code:
         inviter = await check_referral_code(db, referral_code)
 
-    # First user becomes superuser (admin + approved)
-    user_count = await db.execute(select(func.count()).select_from(User))
-    is_first = user_count.scalar() == 0
+    role, status_value = await _assign_role_status(db)
 
     user = User(
         email=email,
@@ -70,8 +126,8 @@ async def register_google_user(
         referral_code=generate_referral_code(),
         referred_by=inviter.id if inviter else None,
         email_verified=True,
-        role="admin" if is_first else "user",
-        status="approved" if is_first else "pending",
+        role=role,
+        status=status_value,
     )
     db.add(user)
 

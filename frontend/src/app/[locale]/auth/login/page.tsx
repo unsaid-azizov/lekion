@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/components/providers";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
+const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "";
 
 function GoogleIcon() {
   return (
@@ -23,9 +24,10 @@ function GoogleIcon() {
 export default function LoginPage() {
   const t = useTranslations("auth");
   const router = useRouter();
-  const { googleLogin, user } = useAuthContext();
+  const { googleLogin, telegramLogin, user } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [gsiReady, setGsiReady] = useState(false);
+  const tgContainerRef = useRef<HTMLDivElement>(null);
 
   const handleCredential = useCallback(
     async (response: { credential: string }) => {
@@ -67,6 +69,37 @@ export default function LoginPage() {
     return () => { script.remove(); };
   }, [handleCredential]);
 
+  // Telegram Login Widget
+  useEffect(() => {
+    if (!TELEGRAM_BOT_USERNAME || !tgContainerRef.current) return;
+
+    (window as any).onTelegramAuth = async (tgUser: Record<string, unknown>) => {
+      setLoading(true);
+      try {
+        await telegramLogin(tgUser);
+      } catch (err: any) {
+        toast.error(err.message);
+        setLoading(false);
+      }
+    };
+
+    const script = document.createElement("script");
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.async = true;
+    script.setAttribute("data-telegram-login", TELEGRAM_BOT_USERNAME);
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-radius", "8");
+    script.setAttribute("data-onauth", "onTelegramAuth(user)");
+    script.setAttribute("data-request-access", "write");
+    tgContainerRef.current.appendChild(script);
+
+    const container = tgContainerRef.current;
+    return () => {
+      if (container) container.innerHTML = "";
+      delete (window as any).onTelegramAuth;
+    };
+  }, [telegramLogin]);
+
   const handleClick = () => {
     if (!gsiReady) return;
     window.google?.accounts.id.prompt();
@@ -81,7 +114,7 @@ export default function LoginPage() {
             {t("loginSubtitle")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pb-8 pt-4">
+        <CardContent className="pb-8 pt-4 space-y-3">
           <button
             onClick={handleClick}
             disabled={loading || !gsiReady}
@@ -90,6 +123,9 @@ export default function LoginPage() {
             <GoogleIcon />
             {loading ? t("loading") : t("continueWithGoogle")}
           </button>
+          {TELEGRAM_BOT_USERNAME && (
+            <div ref={tgContainerRef} className="flex justify-center" />
+          )}
         </CardContent>
       </Card>
     </div>

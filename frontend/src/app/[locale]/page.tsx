@@ -6,14 +6,13 @@ import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/providers";
-import { useGoogleAuth } from "@/hooks/useGoogleAuth";
+import { AuthButtons } from "@/components/auth/auth-buttons";
 import { MapContainer } from "@/components/map/map-container";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StarRating } from "@/components/review/star-rating";
 import { uploadsUrl } from "@/lib/utils";
-import { toast } from "sonner";
 import type { User, Business, Paginated, MapPins } from "@/types";
 
 type ViewTab = "people" | "businesses" | "map";
@@ -22,14 +21,7 @@ export default function HomePage() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
-  const { user, loading, googleLogin } = useAuthContext();
-  const { prompt: googlePrompt } = useGoogleAuth(async (credential) => {
-    try {
-      await googleLogin(credential);
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  });
+  const { user, loading } = useAuthContext();
   const [tab, setTab] = useState<ViewTab>("people");
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState<User[]>([]);
@@ -150,9 +142,7 @@ export default function HomePage() {
               {subtitle}
             </p>
           </div>
-          <Button size="lg" className="px-8 text-sm" onClick={googlePrompt}>
-            {t("auth.signIn")}
-          </Button>
+          <AuthButtons />
         </div>
       </div>
     );

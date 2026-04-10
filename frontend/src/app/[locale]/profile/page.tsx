@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/components/providers";
 import { api } from "@/lib/api";
@@ -18,9 +19,14 @@ import { detectPlatform, PlatformIcon, type Platform } from "@/lib/platforms";
 
 export default function ProfilePage() {
   const t = useTranslations();
-  const { user, refetch } = useAuthContext();
+  const router = useRouter();
+  const { user, loading, refetch } = useAuthContext();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Partial<User>>({});
+
+  useEffect(() => {
+    if (!loading && !user) router.push("/auth/login");
+  }, [loading, user, router]);
 
   if (!user) return null;
 

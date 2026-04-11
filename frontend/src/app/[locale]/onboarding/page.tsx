@@ -75,6 +75,10 @@ export default function OnboardingPage() {
   };
 
   const handleSubmit = async () => {
+    if (!user.photo_path) {
+      toast.error(t("onboarding.photoRequired"));
+      return;
+    }
     if (!form.first_name.trim() || !form.last_name.trim()) {
       toast.error(t("onboarding.nameRequired"));
       return;
@@ -133,7 +137,7 @@ export default function OnboardingPage() {
               onClick={() => fileRef.current?.click()}
               disabled={photoUploading}
             >
-              {photoUploading ? t("common.loading") : t("profile.uploadPhoto")}
+              {photoUploading ? t("common.loading") : <>{t("profile.uploadPhoto")} *</>}
             </Button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           </div>

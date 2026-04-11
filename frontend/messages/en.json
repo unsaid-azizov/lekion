@@ -104,6 +104,7 @@
     "cityPlaceholder": "Moscow, Dubai, Berlin...",
     "submit": "Submit for review",
     "note": "An admin will review your profile. This usually takes less than a day.",
+    "photoRequired": "Please upload a profile photo",
     "nameRequired": "First and last name are required",
     "professionRequired": "Please specify your profession",
     "bioRequired": "Please tell us about yourself",

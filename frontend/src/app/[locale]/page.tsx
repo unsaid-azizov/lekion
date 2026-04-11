@@ -104,7 +104,16 @@ export default function HomePage() {
     document.addEventListener("mouseup", onUp);
   }, [mapWidth]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-3rem)]">
+        <div className="text-center px-4">
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-primary mb-4">LEKION</h1>
+          <div className="h-px w-16 bg-primary/40 mx-auto" />
+        </div>
+      </div>
+    );
+  }
 
   if (user && user.status !== "approved") {
     return (

@@ -45,6 +45,7 @@
     "bio": "About",
     "city": "City",
     "country": "Country",
+    "phone": "Phone",
     "contacts": "Contacts",
     "myBusinesses": "My Businesses",
     "uploadPhoto": "Upload photo"
@@ -110,6 +111,8 @@
     "nameRequired": "First and last name are required",
     "professionRequired": "Please specify your profession",
     "bioRequired": "Please tell us about yourself",
+    "telegramRequired": "Please enter your Telegram username",
+    "phoneRequired": "Please enter your phone number",
     "cityRequired": "Please specify your city"
   },
   "hero": {

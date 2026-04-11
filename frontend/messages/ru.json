@@ -45,6 +45,7 @@
     "bio": "О себе",
     "city": "Город",
     "country": "Страна",
+    "phone": "Телефон",
     "contacts": "Контакты",
     "myBusinesses": "Мои бизнесы",
     "uploadPhoto": "Загрузить фото"
@@ -110,6 +111,8 @@
     "nameRequired": "Имя и фамилия обязательны",
     "professionRequired": "Укажите вашу профессию",
     "bioRequired": "Расскажите о себе",
+    "telegramRequired": "Укажите ваш Telegram",
+    "phoneRequired": "Укажите номер телефона",
     "cityRequired": "Укажите ваш город"
   },
   "hero": {

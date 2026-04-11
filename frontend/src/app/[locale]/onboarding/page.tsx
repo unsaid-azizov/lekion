@@ -26,6 +26,8 @@ export default function OnboardingPage() {
     last_name: "",
     profession: "",
     bio: "",
+    telegram: "",
+    phone: "",
     city: "",
     country: "",
     latitude: null as number | null,
@@ -46,6 +48,8 @@ export default function OnboardingPage() {
       last_name: user.last_name || "",
       profession: user.profession || "",
       bio: user.bio || "",
+      telegram: user.telegram || "",
+      phone: user.phone || "",
       city: user.city || "",
       country: user.country || "",
       latitude: user.latitude ?? null,
@@ -89,6 +93,14 @@ export default function OnboardingPage() {
     }
     if (!form.bio.trim()) {
       toast.error(t("onboarding.bioRequired"));
+      return;
+    }
+    if (!form.telegram.trim()) {
+      toast.error(t("onboarding.telegramRequired"));
+      return;
+    }
+    if (!form.phone.trim()) {
+      toast.error(t("onboarding.phoneRequired"));
       return;
     }
     if (!form.city.trim()) {
@@ -173,6 +185,26 @@ export default function OnboardingPage() {
               rows={4}
               placeholder={t("onboarding.bioPlaceholder")}
             />
+          </div>
+
+          {/* Contacts */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Telegram *</Label>
+              <Input
+                value={form.telegram}
+                onChange={update("telegram")}
+                placeholder="@username"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">{t("profile.phone")} *</Label>
+              <Input
+                value={form.phone}
+                onChange={update("phone")}
+                placeholder="+7 999 123 45 67"
+              />
+            </div>
           </div>
 
           {/* Location */}

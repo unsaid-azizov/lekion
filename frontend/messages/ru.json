@@ -33,6 +33,8 @@
     "loginSubtitle": "Войдите, чтобы продолжить",
     "invitedBy": "Вас пригласил(а) {name}",
     "signIn": "Войти",
+    "loginRequired": "Войдите в аккаунт",
+    "loginRequiredMessage": "Чтобы просматривать профили, нужно войти.",
     "continueWithGoogle": "Продолжить с Google",
     "loading": "Загрузка..."
   },

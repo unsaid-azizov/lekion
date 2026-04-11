@@ -33,6 +33,8 @@
     "loginSubtitle": "Sign in to continue",
     "invitedBy": "Invited by {name}",
     "signIn": "Sign in",
+    "loginRequired": "Sign in required",
+    "loginRequiredMessage": "Please sign in to view profiles.",
     "continueWithGoogle": "Continue with Google",
     "loading": "Loading..."
   },

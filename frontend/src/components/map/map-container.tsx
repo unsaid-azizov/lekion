@@ -74,7 +74,7 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
       await import("leaflet.markercluster/dist/MarkerCluster.css");
       await import("leaflet.markercluster/dist/MarkerCluster.Default.css");
 
-      const map = L.map(containerRef.current, { zoomControl: false, attributionControl: false }).setView([55.75, 37.62], 10);
+      const map = L.map(containerRef.current, { zoomControl: false, attributionControl: false }).setView([55.7558, 37.6173], 10);
       const isDark = document.documentElement.classList.contains("dark");
 
       const tile = L.tileLayer(isDark ? TILES.dark : TILES.light, { maxZoom: 19 }).addTo(map);

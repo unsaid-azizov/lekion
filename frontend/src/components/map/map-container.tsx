@@ -109,14 +109,29 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
     (async () => {
       const L = (await import("leaflet")).default;
 
+      // Track seen coordinates to apply jitter for duplicates
+      const seen = new Map<string, number>();
+      const jitter = (lat: number, lng: number): [number, number] => {
+        const key = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+        const count = seen.get(key) ?? 0;
+        seen.set(key, count + 1);
+        if (count === 0) return [lat, lng];
+        // Spread duplicates in a small circle (~300m radius)
+        const angle = (count * 137.5 * Math.PI) / 180; // golden angle spacing
+        const r = 0.003 * Math.sqrt(count);
+        return [lat + r * Math.cos(angle), lng + r * Math.sin(angle)];
+      };
+
       for (const p of pins.people) {
-        L.marker([p.lat, p.lng], { icon: iconsRef.current!.person })
+        const [lat, lng] = jitter(p.lat, p.lng);
+        L.marker([lat, lng], { icon: iconsRef.current!.person })
           .bindPopup(`<b>${p.name}</b><br/>${p.profession || ""}`)
           .addTo(layerRef.current!);
       }
 
       for (const b of pins.businesses) {
-        L.marker([b.lat, b.lng], { icon: iconsRef.current!.business })
+        const [lat, lng] = jitter(b.lat, b.lng);
+        L.marker([lat, lng], { icon: iconsRef.current!.business })
           .bindPopup(`<b>${b.name}</b><br/>Rating: ${b.average_rating}`)
           .addTo(layerRef.current!);
       }

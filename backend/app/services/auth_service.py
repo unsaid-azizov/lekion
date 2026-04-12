@@ -91,6 +91,56 @@ async def register_telegram_user(
     return user, access, refresh
 
 
+async def register_yandex_user(
+    db: AsyncSession, yandex_id: str, email: str, first_name: str, last_name: str, referral_code: str | None
+) -> tuple[User, str, str]:
+    existing = await db.execute(select(User).where(User.yandex_id == yandex_id))
+    user = existing.scalar_one_or_none()
+    if user:
+        access = create_access_token(user.id, user.role, user.status)
+        refresh = create_refresh_token(user.id, user.role, user.status)
+        return user, access, refresh
+
+    existing_email = await db.execute(select(User).where(User.email == email))
+    user = existing_email.scalar_one_or_none()
+    if user:
+        user.yandex_id = yandex_id
+        await db.commit()
+        await db.refresh(user)
+        access = create_access_token(user.id, user.role, user.status)
+        refresh = create_refresh_token(user.id, user.role, user.status)
+        return user, access, refresh
+
+    inviter = None
+    if referral_code:
+        inviter = await check_referral_code(db, referral_code)
+
+    role, status_value = await _assign_role_status(db)
+
+    user = User(
+        email=email,
+        yandex_id=yandex_id,
+        first_name=first_name,
+        last_name=last_name,
+        referral_code=generate_referral_code(),
+        referred_by=inviter.id if inviter else None,
+        email_verified=True,
+        role=role,
+        status=status_value,
+    )
+    db.add(user)
+
+    if inviter:
+        invite = ReferralInvite(inviter_id=inviter.id, invited_email=email, used_by=user.id, used_at=func.now())
+        db.add(invite)
+
+    await db.flush()
+    access = create_access_token(user.id, user.role, user.status)
+    refresh = create_refresh_token(user.id, user.role, user.status)
+    await db.commit()
+    return user, access, refresh
+
+
 async def register_google_user(
     db: AsyncSession, google_id: str, email: str, first_name: str, last_name: str, referral_code: str | None
 ) -> tuple[User, str, str]:

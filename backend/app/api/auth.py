@@ -14,7 +14,7 @@ from app.core.security import create_access_token, decode_token
 from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import GoogleAuthRequest, ReferralCheck, TelegramAuthRequest, TokenResponse
-from app.services.auth_service import check_referral_code, register_google_user, register_telegram_user
+from app.services.auth_service import check_referral_code, register_google_user, register_telegram_user, register_yandex_user
 
 router = APIRouter()
 
@@ -75,6 +75,72 @@ async def telegram_auth(
         "refresh_token", refresh, httponly=True, secure=True, samesite="strict", max_age=30 * 86400
     )
     return TokenResponse(access_token=access)
+
+
+@router.get("/yandex")
+async def yandex_auth_redirect(referral_code: str | None = None):
+    """Redirect user to Yandex OAuth page."""
+    import urllib.parse
+    params = {
+        "response_type": "code",
+        "client_id": settings.yandex_client_id,
+        "redirect_uri": f"{settings.frontend_url}/api/v1/auth/yandex/callback",
+    }
+    if referral_code:
+        params["state"] = referral_code
+    url = "https://oauth.yandex.ru/authorize?" + urllib.parse.urlencode(params)
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url)
+
+
+@router.get("/yandex/callback")
+async def yandex_callback(
+    code: str,
+    state: str | None = None,
+    response: Response = None,
+    db: AsyncSession = Depends(get_db),
+):
+    if not settings.yandex_client_id:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Yandex auth not configured")
+
+    # Exchange code for token
+    async with httpx.AsyncClient() as client:
+        token_resp = await client.post(
+            "https://oauth.yandex.ru/token",
+            data={
+                "grant_type": "authorization_code",
+                "code": code,
+                "client_id": settings.yandex_client_id,
+                "client_secret": settings.yandex_client_secret,
+            },
+        )
+    if token_resp.status_code != 200:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Failed to get Yandex token")
+
+    yandex_token = token_resp.json()["access_token"]
+
+    # Get user info
+    async with httpx.AsyncClient() as client:
+        info_resp = await client.get(
+            "https://login.yandex.ru/info",
+            headers={"Authorization": f"OAuth {yandex_token}"},
+        )
+    if info_resp.status_code != 200:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Failed to get Yandex user info")
+
+    info = info_resp.json()
+    yandex_id = str(info["id"])
+    email = info.get("default_email") or f"yandex_{yandex_id}@lekion.local"
+    first_name = info.get("first_name") or info.get("login", "")
+    last_name = info.get("last_name") or ""
+
+    user, access, refresh = await register_yandex_user(db, yandex_id, email, first_name, last_name, state)
+    response.set_cookie("refresh_token", refresh, httponly=True, secure=True, samesite="strict", max_age=30 * 86400)
+
+    from fastapi.responses import RedirectResponse
+    redirect = RedirectResponse(url=f"{settings.frontend_url}/auth/callback?token={access}")
+    redirect.set_cookie("refresh_token", refresh, httponly=True, secure=True, samesite="strict", max_age=30 * 86400)
+    return redirect
 
 
 @router.post("/refresh", response_model=TokenResponse)

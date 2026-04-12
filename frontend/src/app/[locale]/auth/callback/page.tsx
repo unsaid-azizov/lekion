@@ -1,37 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { setToken } from "@/lib/api";
 import { useAuthContext } from "@/components/providers";
-import { toast } from "sonner";
-import type { User } from "@/types";
-
-function getRedirectPath(user: User): string {
-  if (user.status === "approved") return "/";
-  if (!user.bio || !user.profession || !user.city) return "/onboarding";
-  return "/pending-approval";
-}
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const { googleLogin } = useAuthContext();
+  const params = useSearchParams();
+  const { refetch } = useAuthContext();
 
   useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const idToken = params.get("id_token");
-
-    if (idToken) {
-      googleLogin(idToken)
-        .then((user) => router.push(getRedirectPath(user)))
-        .catch((err: any) => {
-          toast.error(err.message);
-          router.push("/auth/login");
-        });
-    } else {
-      router.push("/auth/login");
+    const token = params.get("token");
+    if (!token) {
+      router.replace("/auth/login");
+      return;
     }
-  }, [googleLogin, router]);
+    setToken(token);
+    refetch().then(() => router.replace("/"));
+  }, [params, router, refetch]);
 
-  return null;
+  return (
+    <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+      <p className="text-muted-foreground">Выполняется вход...</p>
+    </div>
+  );
 }

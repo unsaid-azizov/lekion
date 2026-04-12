@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/api/v1/auth/google/callback"
 
+    yandex_client_id: str = ""
+    yandex_client_secret: str = ""
+
     telegram_bot_token: str = ""
     telegram_bot_username: str = ""
     telegram_channel_id: str = ""  # e.g. "-100xxxxxxxxx" (group/channel ID)

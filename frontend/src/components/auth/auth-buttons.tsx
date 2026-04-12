@@ -7,6 +7,8 @@ import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import { toast } from "sonner";
 
 const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "";
+const YANDEX_CLIENT_ID = process.env.NEXT_PUBLIC_YANDEX_CLIENT_ID || "";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 function GoogleIcon() {
   return (
@@ -19,7 +21,18 @@ function GoogleIcon() {
   );
 }
 
-export function AuthButtons() {
+function YandexIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="12" fill="#FC3F1D"/>
+      <path d="M13.32 17H15V7h-2.14c-2.34 0-3.57 1.18-3.57 2.95 0 1.5.74 2.32 2.06 3.22L9 17h1.78l2.47-4.2-.74-.48c-1.02-.67-1.46-1.22-1.46-2.27 0-.97.65-1.62 1.8-1.62h.47V17z" fill="white"/>
+    </svg>
+  );
+}
+
+const BTN = "w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed";
+
+export function AuthButtons({ referralCode }: { referralCode?: string }) {
   const t = useTranslations("auth");
   const { googleLogin, telegramLogin } = useAuthContext();
   const [loading, setLoading] = useState(false);
@@ -28,12 +41,18 @@ export function AuthButtons() {
   const { prompt: googlePrompt } = useGoogleAuth(async (credential) => {
     setLoading(true);
     try {
-      await googleLogin(credential);
+      await googleLogin(credential, referralCode);
     } catch (err: any) {
       toast.error(err.message);
       setLoading(false);
     }
   });
+
+  const handleYandex = () => {
+    const backendUrl = API_URL.replace("/api/v1", "");
+    const url = `${backendUrl}/api/v1/auth/yandex${referralCode ? `?referral_code=${referralCode}` : ""}`;
+    window.location.href = url;
+  };
 
   useEffect(() => {
     if (!TELEGRAM_BOT_USERNAME || !tgContainerRef.current) return;
@@ -41,7 +60,7 @@ export function AuthButtons() {
     (window as any).onTelegramAuth = async (tgUser: Record<string, unknown>) => {
       setLoading(true);
       try {
-        await telegramLogin(tgUser);
+        await telegramLogin(tgUser, referralCode);
       } catch (err: any) {
         toast.error(err.message);
         setLoading(false);
@@ -63,18 +82,20 @@ export function AuthButtons() {
       if (container) container.innerHTML = "";
       delete (window as any).onTelegramAuth;
     };
-  }, [telegramLogin]);
+  }, [telegramLogin, referralCode]);
 
   return (
     <div className="space-y-3 w-full max-w-xs mx-auto">
-      <button
-        onClick={googlePrompt}
-        disabled={loading}
-        className="w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+      <button onClick={googlePrompt} disabled={loading} className={BTN}>
         <GoogleIcon />
         {loading ? t("loading") : t("continueWithGoogle")}
       </button>
+      {YANDEX_CLIENT_ID && (
+        <button onClick={handleYandex} disabled={loading} className={BTN}>
+          <YandexIcon />
+          Продолжить с Яндекс
+        </button>
+      )}
       {TELEGRAM_BOT_USERNAME && (
         <div ref={tgContainerRef} className="flex justify-center" />
       )}

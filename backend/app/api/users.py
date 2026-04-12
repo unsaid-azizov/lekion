@@ -38,7 +38,7 @@ async def update_me(
     await db.refresh(user)
     # Notify admin when a pending user completes their profile
     if was_pending and user.profession and user.bio and user.city:
-        await notify_admin_new_application(user)
+        await notify_admin_new_application(user, db)
     return user
 
 

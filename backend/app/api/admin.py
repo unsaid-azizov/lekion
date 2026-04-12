@@ -55,7 +55,7 @@ async def approve_user(
     await db.commit()
     await db.refresh(user)
     await notify_user_approved(user)
-    await announce_new_member(user)
+    await announce_new_member(user, db)
     return user
 
 

@@ -87,6 +87,14 @@ async def telegram_webhook(request: Request):
         sender = message.get("from", {})
         sender_tg_id = sender.get("id")
 
+        if text.startswith("/start") and chat.get("type") in ("group", "supergroup"):
+            await _post(
+                "sendMessage",
+                chat_id=chat["id"],
+                text="👋 Lekion бот активирован в этой группе. Новые участники сообщества будут анонсироваться здесь.",
+            )
+            return {"ok": True}
+
         if not text.startswith("/admin"):
             return {"ok": True}
 

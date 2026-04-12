@@ -81,7 +81,8 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
       tileRef.current = tile;
       L.control.zoom({ position: "bottomright" }).addTo(map);
       layerRef.current = (L as any).markerClusterGroup({
-        maxClusterRadius: 40,
+        maxClusterRadius: 60,
+        disableClusteringAtZoom: 11,
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: false,
         iconCreateFunction: (cluster: any) => {

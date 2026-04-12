@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import require_approved
+from app.core.deps import require_member
 from app.database import get_db
 from app.models.business import Business
 from app.models.user import User
@@ -20,9 +20,10 @@ async def get_pins(
     east: float = Query(...),
     category_id: str | None = None,
     search: str | None = None,
-    _: User = Depends(require_approved),
+    current_user: User = Depends(require_member),
     db: AsyncSession = Depends(get_db),
 ):
+    is_approved = current_user.status == "approved"
     response = MapPinsResponse()
 
     if type in ("people", "all"):
@@ -44,7 +45,14 @@ async def get_pins(
             )
         result = await db.execute(query)
         response.people = [
-            PersonPin(id=u.id, lat=u.latitude, lng=u.longitude, name=f"{u.first_name} {u.last_name}", profession=u.profession, photo_path=u.photo_path)
+            PersonPin(
+                id=u.id,
+                lat=u.latitude,
+                lng=u.longitude,
+                name=f"{u.first_name} {u.last_name}" if is_approved else "Участник сообщества",
+                profession=u.profession if is_approved else None,
+                photo_path=u.photo_path if is_approved else None,
+            )
             for u in result.scalars()
         ]
 

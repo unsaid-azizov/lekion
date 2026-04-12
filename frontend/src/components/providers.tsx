@@ -22,6 +22,8 @@ export function useAuthContext() {
 }
 
 const AUTH_PATHS = ["/auth/", "/onboarding", "/pending-approval"];
+// Pages blocked for incomplete users (personal profiles, own profile editing)
+const APPROVED_ONLY_PATHS = ["/profile/", "/referrals"];
 
 function RouteGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useContext(AuthContext);
@@ -43,7 +45,8 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
     if (isAuthPath) return;
 
     if (user.status === "incomplete") {
-      router.replace("/onboarding");
+      const isBlocked = APPROVED_ONLY_PATHS.some((p) => pathname.includes(p));
+      if (isBlocked) router.replace("/onboarding");
     } else if (user.status === "pending") {
       router.replace("/pending-approval");
     }

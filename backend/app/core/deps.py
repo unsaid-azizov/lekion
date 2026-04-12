@@ -41,6 +41,13 @@ async def require_approved(user: User = Depends(get_current_user)) -> User:
     return user
 
 
+async def require_member(user: User = Depends(get_current_user)) -> User:
+    """Allow approved and incomplete users (registered but profile not yet submitted)."""
+    if user.status not in ("approved", "incomplete"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account not approved")
+    return user
+
+
 async def require_admin(user: User = Depends(get_current_user)) -> User:
     if user.role != "admin":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin access required")

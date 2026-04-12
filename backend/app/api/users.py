@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.core.deps import get_current_user, require_approved
+from app.core.deps import get_current_user, require_approved, require_member
 from app.database import get_db
 from app.models.link import UserLink
 from app.models.project import Project
@@ -119,7 +119,7 @@ async def search_users(
     country: str | None = None,
     page: int = 1,
     per_page: int = 20,
-    _: User = Depends(require_approved),
+    _: User = Depends(require_member),
     db: AsyncSession = Depends(get_db),
 ):
     query = apply_user_search(select(User), q, profession, city, country)

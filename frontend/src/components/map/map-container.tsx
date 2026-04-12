@@ -70,6 +70,10 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
         }),
       };
 
+      const MC = (await import("leaflet.markercluster")).default;
+      await import("leaflet.markercluster/dist/MarkerCluster.css");
+      await import("leaflet.markercluster/dist/MarkerCluster.Default.css");
+
       const map = L.map(containerRef.current, { zoomControl: false, attributionControl: false }).setView([55.75, 37.62], 10);
       const isDark = document.documentElement.classList.contains("dark");
 
@@ -77,7 +81,12 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
 
       tileRef.current = tile;
       L.control.zoom({ position: "bottomright" }).addTo(map);
-      layerRef.current = L.layerGroup().addTo(map);
+      layerRef.current = (L as any).markerClusterGroup({
+        maxClusterRadius: 40,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+      }) as L.LayerGroup;
+      map.addLayer(layerRef.current);
       mapRef.current = map;
 
       map.on("moveend", () => notifyBounds(map));

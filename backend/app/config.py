@@ -16,6 +16,8 @@ class Settings(BaseSettings):
 
     telegram_bot_token: str = ""
     telegram_bot_username: str = ""
+    telegram_admin_chat_id: int | None = None
+    telegram_channel_id: str = ""  # e.g. "@lekion_channel" or "-100xxxxxxxxx"
 
     frontend_url: str = "http://localhost:3000"
 

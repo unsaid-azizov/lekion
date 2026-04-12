@@ -14,6 +14,7 @@ from app.models.referral import ReferralInvite
 from app.models.user import User
 from app.schemas.user import LinkCreate, LinkOut, LinkUpdate, ProjectCreate, ProjectOut, ProjectUpdate, ReferralInfo, ReferralTreeNode, UserOut, UserPublic, UserUpdate
 from app.services.search_service import apply_user_search, paginate
+from app.services.telegram_bot import notify_admin_new_application
 from app.utils.images import delete_image, save_image
 
 router = APIRouter()
@@ -30,10 +31,14 @@ async def update_me(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    was_pending = user.status == "pending"
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
     await db.commit()
     await db.refresh(user)
+    # Notify admin when a pending user completes their profile
+    if was_pending and user.profession and user.bio and user.city:
+        await notify_admin_new_application(user)
     return user
 
 

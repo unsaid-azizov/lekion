@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import admin, auth, businesses, categories, map, reviews, users
+from app.api import admin, auth, bot, businesses, categories, map, reviews, users
 from app.config import settings
 from app.core.redis import redis_client
 
@@ -34,6 +34,7 @@ app.include_router(reviews.router, prefix="/api/v1/reviews", tags=["reviews"])
 app.include_router(map.router, prefix="/api/v1/map", tags=["map"])
 app.include_router(categories.router, prefix="/api/v1/categories", tags=["categories"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
+app.include_router(bot.router, prefix="/api/v1/bot", tags=["bot"])
 
 upload_path = Path(settings.upload_dir)
 upload_path.mkdir(parents=True, exist_ok=True)

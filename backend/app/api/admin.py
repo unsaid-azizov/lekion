@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import is_superuser, require_admin
+from app.services.telegram_bot import announce_new_member, notify_user_approved
 from app.database import get_db
 from app.models.business import Business
 from app.models.review import Review
@@ -53,6 +54,8 @@ async def approve_user(
     user.status = "approved"
     await db.commit()
     await db.refresh(user)
+    await notify_user_approved(user)
+    await announce_new_member(user)
     return user
 
 

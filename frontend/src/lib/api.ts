@@ -52,15 +52,24 @@ export async function api<T>(
     credentials: "include",
   });
 
-  if (res.status === 401 && token) {
-    const newToken = await refreshToken();
-    if (newToken) {
-      headers["Authorization"] = `Bearer ${newToken}`;
-      res = await fetch(`${API_URL}${path}`, {
-        ...options,
-        headers,
-        credentials: "include",
-      });
+  if (res.status === 401) {
+    if (token) {
+      const newToken = await refreshToken();
+      if (newToken) {
+        headers["Authorization"] = `Bearer ${newToken}`;
+        res = await fetch(`${API_URL}${path}`, {
+          ...options,
+          headers,
+          credentials: "include",
+        });
+      }
+    }
+    if (res.status === 401) {
+      setToken(null);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+      }
+      throw new Error("unauthorized");
     }
   }
 

@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, createContext, useContext, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@/types";
 
@@ -27,6 +28,15 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useContext(AuthContext);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    const handler = () => {
+      toast.error("Вы не авторизованы. Войдите в аккаунт.");
+      router.push("/auth/login");
+    };
+    window.addEventListener("auth:unauthorized", handler);
+    return () => window.removeEventListener("auth:unauthorized", handler);
+  }, [router]);
 
   useEffect(() => {
     if (loading || !user) return;

@@ -61,9 +61,7 @@ export function BusinessForm({ initialData, onSubmit, submitting }: Props) {
   const markerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
-    api<Category[]>("/categories").then(setCategories).catch(() => {
-      toast.error("Не удалось загрузить категории. Войдите в аккаунт и попробуйте снова.");
-    });
+    api<Category[]>("/categories").then(setCategories).catch(() => {});
   }, []);
 
   const setMarker = useCallback((lat: number, lng: number) => {

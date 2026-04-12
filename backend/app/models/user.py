@@ -36,7 +36,7 @@ class User(Base):
     whatsapp: Mapped[str | None] = mapped_column(String(50))
     instagram: Mapped[str | None] = mapped_column(String(100))
 
-    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    status: Mapped[str] = mapped_column(String(20), default="incomplete", index=True)
     role: Mapped[str] = mapped_column(String(20), default="user")
     referred_by: Mapped[uuid.UUID | None] = mapped_column(UUID, index=True)
     referral_code: Mapped[str] = mapped_column(String(20), unique=True)

@@ -45,6 +45,10 @@ export default function OnboardingPage() {
       router.push("/");
       return;
     }
+    if (user.status === "pending") {
+      router.push("/pending-approval");
+      return;
+    }
     if (!formInitialized.current) {
       formInitialized.current = true;
       setForm({

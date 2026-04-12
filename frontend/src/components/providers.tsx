@@ -42,13 +42,10 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
     const isAuthPath = AUTH_PATHS.some((p) => pathname.includes(p));
     if (isAuthPath) return;
 
-    if (user.status === "pending") {
-      const profileComplete = user.bio && user.profession && user.city && (user.phone || user.telegram);
-      if (!profileComplete) {
-        router.replace("/onboarding");
-      } else {
-        router.replace("/pending-approval");
-      }
+    if (user.status === "incomplete") {
+      router.replace("/onboarding");
+    } else if (user.status === "pending") {
+      router.replace("/pending-approval");
     }
   }, [user, loading, pathname, router]);
 

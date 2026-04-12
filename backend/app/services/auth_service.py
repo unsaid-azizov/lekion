@@ -37,7 +37,7 @@ async def _assign_role_status(db: AsyncSession) -> tuple[str, str]:
     """First user becomes superuser (admin + approved)."""
     user_count = await db.execute(select(func.count()).select_from(User))
     is_first = user_count.scalar() == 0
-    return ("admin", "approved") if is_first else ("user", "pending")
+    return ("admin", "approved") if is_first else ("user", "incomplete")
 
 
 async def register_telegram_user(

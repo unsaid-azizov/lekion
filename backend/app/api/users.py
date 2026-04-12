@@ -31,12 +31,12 @@ async def update_me(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    was_pending = user.status == "pending"
+    was_incomplete = user.status == "incomplete"
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
 
-    # When a pending user submits their profile, enforce all required fields
-    if was_pending and (user.profession or user.bio or user.city):
+    # When an incomplete user submits their profile, enforce all required fields
+    if was_incomplete and (user.profession or user.bio or user.city):
         missing = []
         if not (user.first_name or "").strip():
             missing.append("first_name")
@@ -57,11 +57,12 @@ async def update_me(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 f"Required fields missing: {', '.join(missing)}",
             )
+        # Profile complete — move to pending queue
+        user.status = "pending"
 
     await db.commit()
     await db.refresh(user)
-    # Notify admin when a pending user completes their profile
-    if was_pending and user.profession and user.bio and user.city:
+    if was_incomplete and user.status == "pending":
         await notify_admin_new_application(user, db)
     return user
 

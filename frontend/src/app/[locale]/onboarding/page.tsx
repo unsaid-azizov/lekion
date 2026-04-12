@@ -37,24 +37,29 @@ export default function OnboardingPage() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const formInitialized = useRef(false);
+
   useEffect(() => {
     if (!user) return;
     if (user.status === "approved") {
       router.push("/");
       return;
     }
-    setForm({
-      first_name: user.first_name || "",
-      last_name: user.last_name || "",
-      profession: user.profession || "",
-      bio: user.bio || "",
-      telegram: user.telegram || "",
-      phone: user.phone || "",
-      city: user.city || "",
-      country: user.country || "",
-      latitude: user.latitude ?? null,
-      longitude: user.longitude ?? null,
-    });
+    if (!formInitialized.current) {
+      formInitialized.current = true;
+      setForm({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        profession: user.profession || "",
+        bio: user.bio || "",
+        telegram: user.telegram || "",
+        phone: user.phone || "",
+        city: user.city || "",
+        country: user.country || "",
+        latitude: user.latitude ?? null,
+        longitude: user.longitude ?? null,
+      });
+    }
   }, [user, router]);
 
   if (!user) return null;

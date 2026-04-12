@@ -16,7 +16,7 @@ def save_image(file_bytes: bytes, subdir: str, max_size: tuple[int, int]) -> str
 
     img = Image.open(__import__("io").BytesIO(file_bytes))
     img.thumbnail(max_size, Image.LANCZOS)
-    img.save(filepath, "WEBP", quality=85)
+    img.save(filepath, "WEBP", quality=95)
 
     return f"{subdir}/{filename}"
 

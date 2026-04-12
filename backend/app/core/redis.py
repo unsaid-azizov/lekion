@@ -26,4 +26,5 @@ class RedisClient:
         return await self.r.exists(f"blacklist:{jti}") > 0
 
 
+
 redis_client = RedisClient()

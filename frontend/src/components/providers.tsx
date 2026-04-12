@@ -11,7 +11,6 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   googleLogin: (credential: string, referralCode?: string) => Promise<User>;
-  telegramLogin: (tgData: Record<string, unknown>, referralCode?: string) => Promise<User>;
   logout: () => void;
   refetch: () => Promise<void>;
 }

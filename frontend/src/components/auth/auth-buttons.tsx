@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/components/providers";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import { toast } from "sonner";
 
-const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "";
 const YANDEX_CLIENT_ID = process.env.NEXT_PUBLIC_YANDEX_CLIENT_ID || "";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -34,9 +33,8 @@ const BTN = "w-full flex items-center justify-center gap-3 rounded-lg border bor
 
 export function AuthButtons({ referralCode }: { referralCode?: string }) {
   const t = useTranslations("auth");
-  const { googleLogin, telegramLogin } = useAuthContext();
+  const { googleLogin } = useAuthContext();
   const [loading, setLoading] = useState(false);
-  const tgContainerRef = useRef<HTMLDivElement>(null);
 
   const { prompt: googlePrompt } = useGoogleAuth(async (credential) => {
     setLoading(true);
@@ -54,36 +52,6 @@ export function AuthButtons({ referralCode }: { referralCode?: string }) {
     window.location.href = url;
   };
 
-  useEffect(() => {
-    if (!TELEGRAM_BOT_USERNAME || !tgContainerRef.current) return;
-
-    (window as any).onTelegramAuth = async (tgUser: Record<string, unknown>) => {
-      setLoading(true);
-      try {
-        await telegramLogin(tgUser, referralCode);
-      } catch (err: any) {
-        toast.error(err.message);
-        setLoading(false);
-      }
-    };
-
-    const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.async = true;
-    script.setAttribute("data-telegram-login", TELEGRAM_BOT_USERNAME);
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "8");
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
-    script.setAttribute("data-request-access", "write");
-    tgContainerRef.current.appendChild(script);
-
-    const container = tgContainerRef.current;
-    return () => {
-      if (container) container.innerHTML = "";
-      delete (window as any).onTelegramAuth;
-    };
-  }, [telegramLogin, referralCode]);
-
   return (
     <div className="space-y-3 w-full max-w-xs mx-auto">
       <button onClick={googlePrompt} disabled={loading} className={BTN}>
@@ -95,9 +63,6 @@ export function AuthButtons({ referralCode }: { referralCode?: string }) {
           <YandexIcon />
           Продолжить с Яндекс
         </button>
-      )}
-      {TELEGRAM_BOT_USERNAME && (
-        <div ref={tgContainerRef} className="flex justify-center" />
       )}
     </div>
   );

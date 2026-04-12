@@ -33,7 +33,13 @@ async def pending_users(
 ):
     result = await db.execute(
         select(User)
-        .where(User.status == "pending")
+        .where(
+            User.status == "pending",
+            User.profession.is_not(None),
+            User.bio.is_not(None),
+            User.city.is_not(None),
+            User.photo_path.is_not(None),
+        )
         .order_by(User.created_at.asc())
         .offset((page - 1) * per_page)
         .limit(per_page)

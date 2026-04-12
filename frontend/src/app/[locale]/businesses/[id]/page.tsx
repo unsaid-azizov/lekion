@@ -89,7 +89,10 @@ export default function BusinessDetailPage({ params }: { params: Promise<{ id: s
         </CardContent>
       </Card>
 
-      {/* Members section — visible to owners */}
+      {/* Public owners section */}
+      <OwnersSection ownerId={business.owner_id} members={business.members} />
+
+      {/* Members management — visible to owners only */}
       {isOwner && (
         <MembersSection businessId={id} members={business.members} onChanged={fetchBusiness} />
       )}
@@ -104,6 +107,43 @@ export default function BusinessDetailPage({ params }: { params: Promise<{ id: s
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function OwnersSection({ ownerId, members }: { ownerId: string; members: BusinessMember[] }) {
+  const owners = members.filter((m) => m.role === "owner");
+  if (owners.length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{owners.length === 1 ? "Владелец" : "Владельцы"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-3">
+          {owners.map((m) => (
+            <Link
+              key={m.id}
+              href={`/profile/${m.user_id}`}
+              className="flex items-center gap-3 rounded-lg border border-border bg-card hover:border-primary/40 hover:shadow-[0_0_16px_rgba(180,130,60,0.1)] transition-all p-3 min-w-48 flex-1"
+            >
+              <Avatar className="h-10 w-10 shrink-0 rounded-md ring-1 ring-primary/20">
+                <AvatarImage src={uploadsUrl(m.photo_path)} className="rounded-md" />
+                <AvatarFallback className="rounded-md text-xs bg-primary/10 text-primary font-semibold">
+                  {m.first_name[0]}{m.last_name[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="font-medium text-sm truncate">{m.first_name} {m.last_name}</p>
+                {m.profession && (
+                  <p className="text-xs text-muted-foreground truncate">{m.profession}</p>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

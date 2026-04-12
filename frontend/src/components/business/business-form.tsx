@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -133,6 +134,19 @@ export function BusinessForm({ initialData, onSubmit, submitting }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.description.trim()) {
+      toast.error("Добавьте описание бизнеса");
+      return;
+    }
+    if (!form.category_id) {
+      toast.error("Выберите категорию");
+      return;
+    }
+    const hasContact = form.phone.trim() || form.telegram.trim() || form.whatsapp.trim() || form.website.trim() || form.email.trim();
+    if (!hasContact) {
+      toast.error("Укажите хотя бы один способ связи: телефон, Telegram, WhatsApp, сайт или email");
+      return;
+    }
     const tags = form.tags
       .split(",")
       .map((t) => t.trim())
@@ -154,11 +168,11 @@ export function BusinessForm({ initialData, onSubmit, submitting }: Props) {
         <Input required value={form.name} onChange={update("name")} placeholder="Hermes Operations" />
       </div>
       <div className="space-y-2">
-        <Label>{t("description")}</Label>
+        <Label>{t("description")} *</Label>
         <Textarea value={form.description} onChange={update("description")} placeholder="Внедрение ИИ в бизнес-процессы, автоматизация, CRM-интеграции" />
       </div>
       <div className="space-y-2">
-        <Label>{t("category")}</Label>
+        <Label>{t("category")} *</Label>
         <Select value={form.category_id} onValueChange={(v) => setForm((prev) => ({ ...prev, category_id: v ?? "" }))}>
           <SelectTrigger>
             <SelectValue placeholder="Выберите категорию">
@@ -195,6 +209,7 @@ export function BusinessForm({ initialData, onSubmit, submitting }: Props) {
         )}
       </div>
 
+      <p className="text-xs text-muted-foreground">* Укажите хотя бы один способ связи</p>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Phone</Label>

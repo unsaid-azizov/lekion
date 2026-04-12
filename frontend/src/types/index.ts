@@ -45,6 +45,7 @@ export interface BusinessMember {
   first_name: string;
   last_name: string;
   photo_path?: string;
+  profession?: string;
 }
 
 export interface Business {

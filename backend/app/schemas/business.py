@@ -64,6 +64,7 @@ class MemberOut(BaseModel):
     first_name: str = ""
     last_name: str = ""
     photo_path: str | None = None
+    profession: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -76,6 +77,7 @@ class MemberOut(BaseModel):
             first_name=member.user.first_name if member.user else "",
             last_name=member.user.last_name if member.user else "",
             photo_path=member.user.photo_path if member.user else None,
+            profession=member.user.profession if member.user else None,
         )
 
 

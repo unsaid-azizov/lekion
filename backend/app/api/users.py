@@ -34,6 +34,30 @@ async def update_me(
     was_pending = user.status == "pending"
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
+
+    # When a pending user submits their profile, enforce all required fields
+    if was_pending and (user.profession or user.bio or user.city):
+        missing = []
+        if not (user.first_name or "").strip():
+            missing.append("first_name")
+        if not (user.last_name or "").strip():
+            missing.append("last_name")
+        if not (user.profession or "").strip():
+            missing.append("profession")
+        if not (user.bio or "").strip():
+            missing.append("bio")
+        if not (user.city or "").strip():
+            missing.append("city")
+        if not (user.phone or "").strip() and not (user.telegram or "").strip():
+            missing.append("phone or telegram")
+        if not user.photo_path:
+            missing.append("photo")
+        if missing:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                f"Required fields missing: {', '.join(missing)}",
+            )
+
     await db.commit()
     await db.refresh(user)
     # Notify admin when a pending user completes their profile

@@ -140,3 +140,11 @@
 .leaflet-control-attribution a {
   color: inherit !important;
 }
+/* Override leaflet.markercluster green with gold */
+.marker-cluster div {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.marker-cluster {
+  background: transparent !important;
+}

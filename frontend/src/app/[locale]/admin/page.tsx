@@ -31,7 +31,7 @@ export default function AdminDashboardPage() {
           <Card key={status}>
             <CardContent className="pt-4 text-center">
               <p className="text-3xl font-bold">{count}</p>
-              <p className="text-sm text-muted-foreground capitalize">{status}</p>
+              <p className="text-sm text-muted-foreground">{{ incomplete: "Не заполнили", pending: "Ожидают", approved: "Одобрены", rejected: "Отклонены", banned: "Заблокированы" }[status] ?? status}</p>
             </CardContent>
           </Card>
         ))}
@@ -41,13 +41,13 @@ export default function AdminDashboardPage() {
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold">{stats.businesses}</p>
-            <p className="text-sm text-muted-foreground">Businesses</p>
+            <p className="text-sm text-muted-foreground">Бизнесы</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold">{stats.reviews}</p>
-            <p className="text-sm text-muted-foreground">Reviews</p>
+            <p className="text-sm text-muted-foreground">Отзывы</p>
           </CardContent>
         </Card>
       </div>

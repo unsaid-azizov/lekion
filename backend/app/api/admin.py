@@ -180,7 +180,7 @@ async def admin_stats(
     db: AsyncSession = Depends(get_db),
 ):
     users_by_status = {}
-    for s in ("pending", "approved", "rejected", "banned"):
+    for s in ("incomplete", "pending", "approved", "rejected", "banned"):
         result = await db.execute(select(func.count()).select_from(User).where(User.status == s))
         users_by_status[s] = result.scalar()
 

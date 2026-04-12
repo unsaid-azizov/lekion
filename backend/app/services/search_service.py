@@ -64,7 +64,12 @@ def apply_user_search(query: Select, q: str | None, profession: str | None, city
             if simple_tsq is not None:
                 ts_rank = func.ts_rank_cd(User.search_vector, simple_tsq) + func.ts_rank_cd(User.search_vector, russian_tsq)
                 rank = rank + ts_rank * 20
-            query = query.order_by(rank.desc())
+            admin_boost = case((User.role == "admin", literal(100.0)), else_=literal(0.0))
+            query = query.order_by((rank + admin_boost).desc())
+
+    if not q and not for_count:
+        admin_boost = case((User.role == "admin", literal(1.0)), else_=literal(0.0))
+        query = query.order_by(admin_boost.desc(), User.created_at.asc())
 
     if profession:
         query = query.where(User.profession.ilike(f"%{profession}%"))

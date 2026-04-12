@@ -23,7 +23,7 @@ async def get_pins(
     current_user: User = Depends(require_member),
     db: AsyncSession = Depends(get_db),
 ):
-    is_approved = current_user.status == "approved"
+    is_approved = current_user.status in ("approved", "admin")
     response = MapPinsResponse()
 
     if type in ("people", "all"):

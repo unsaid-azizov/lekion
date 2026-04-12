@@ -42,9 +42,9 @@ async def require_approved(user: User = Depends(get_current_user)) -> User:
 
 
 async def require_member(user: User = Depends(get_current_user)) -> User:
-    """Allow approved and incomplete users (registered but profile not yet submitted)."""
-    if user.status not in ("approved", "incomplete"):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account not approved")
+    """Allow any registered user except banned."""
+    if user.status == "banned":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account banned")
     return user
 
 

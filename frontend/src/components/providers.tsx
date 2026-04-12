@@ -47,8 +47,9 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
     if (user.status === "incomplete") {
       const isBlocked = APPROVED_ONLY_PATHS.some((p) => pathname.includes(p));
       if (isBlocked) router.replace("/onboarding");
-    } else if (user.status === "pending") {
-      router.replace("/pending-approval");
+    } else if (user.status === "pending" || user.status === "rejected") {
+      const isBlocked = APPROVED_ONLY_PATHS.some((p) => pathname.includes(p));
+      if (isBlocked) router.replace("/pending-approval");
     }
   }, [user, loading, pathname, router]);
 

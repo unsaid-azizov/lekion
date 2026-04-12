@@ -16,7 +16,7 @@ export interface User {
   telegram?: string;
   whatsapp?: string;
   instagram?: string;
-  status: "pending" | "approved" | "rejected" | "banned";
+  status: "incomplete" | "pending" | "approved" | "rejected" | "banned";
   role: "user" | "admin";
   referral_code: string;
   is_visible_on_map: boolean;

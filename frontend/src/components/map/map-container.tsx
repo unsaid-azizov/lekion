@@ -70,9 +70,8 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
         }),
       };
 
-      const MC = (await import("leaflet.markercluster")).default;
+      await import("leaflet.markercluster").catch(() => {});
       await import("leaflet.markercluster/dist/MarkerCluster.css");
-      await import("leaflet.markercluster/dist/MarkerCluster.Default.css");
 
       const map = L.map(containerRef.current, { zoomControl: false, attributionControl: false }).setView([55.7558, 37.6173], 10);
       const isDark = document.documentElement.classList.contains("dark");
@@ -85,6 +84,15 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
         maxClusterRadius: 40,
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: false,
+        iconCreateFunction: (cluster: any) => {
+          const count = cluster.getChildCount();
+          return L.divIcon({
+            className: "",
+            html: `<div style="width:32px;height:32px;background:rgba(200,165,90,0.85);border:2px solid rgba(200,165,90,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1a1410;font-size:11px;font-weight:700;box-shadow:0 0 12px rgba(200,165,90,0.5)">${count}</div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+          });
+        },
       }) as L.LayerGroup;
       map.addLayer(layerRef.current);
       mapRef.current = map;

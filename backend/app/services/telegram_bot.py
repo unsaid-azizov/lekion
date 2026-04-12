@@ -63,36 +63,137 @@ async def notify_user_approved(user) -> None:
     )
 
 
+def _build_intro(user, profile_url: str) -> str:
+    name = f"{user.first_name} {user.last_name}".strip()
+    lines = [f"#интро <b>{name}</b>", ""]
+
+    if user.profession:
+        lines.append(f"💼 <b>{user.profession}</b>")
+    if user.city:
+        city_country = user.city
+        if user.country and user.country != user.city:
+            city_country += f", {user.country}"
+        lines.append(f"📍 {city_country}")
+
+    bio = (user.bio or "").strip()
+    if bio:
+        lines.append("")
+        if len(bio) > 400:
+            lines.append(bio[:400].rstrip() + f'...\n<a href="{profile_url}">читать далее →</a>')
+        else:
+            lines.append(bio)
+
+    # Contacts
+    contacts = []
+    if user.telegram:
+        tg = user.telegram if user.telegram.startswith("@") else f"@{user.telegram}"
+        contacts.append(f'<a href="https://t.me/{user.telegram.lstrip("@")}">{tg}</a>')
+    if user.website:
+        site = user.website.rstrip("/")
+        display = site.replace("https://", "").replace("http://", "")
+        contacts.append(f'<a href="{site if site.startswith("http") else "https://" + site}">{display}</a>')
+    if user.phone:
+        contacts.append(f"📞 {user.phone}")
+    if contacts:
+        lines.append("")
+        lines.append("📬 " + " · ".join(contacts))
+
+    # Businesses
+    businesses = getattr(user, "businesses", [])
+    if businesses:
+        lines.append("")
+        lines.append("🏢 <b>Бизнесы:</b>")
+        for biz in businesses:
+            biz_url = f"{settings.frontend_url}/businesses/{biz.id}"
+            cat = biz.category.name_ru if biz.category else ""
+            suffix = f" — {cat}" if cat else ""
+            lines.append(f'  • <a href="{biz_url}">{biz.name}</a>{suffix}')
+
+    lines.append("")
+    lines.append(f'🔗 <a href="{profile_url}">Профиль в Lekion</a>')
+    return "\n".join(lines)
+
+
 async def announce_new_member(user, db: AsyncSession) -> None:
     """Announce approved member to all known groups + DM all users with telegram_id."""
     from app.models.bot_chat import BotChat
     from app.models.user import User
 
-    name = f"{user.first_name} {user.last_name}".strip()
     profile_url = f"{settings.frontend_url}/profile/{user.id}"
+    text = _build_intro(user, profile_url)
 
-    lines = [f"👋 <b>Новый участник — {name}</b>"]
-    if user.profession:
-        lines.append(f"💼 {user.profession}")
-    if user.city:
-        lines.append(f"📍 {user.city}")
-    if user.bio:
-        lines.append(f"\n{user.bio[:300]}")
-    lines.append(f'\n<a href="{profile_url}">Профиль в Lekion</a>')
-    text = "\n".join(lines)
+    # Build recipient lists
+    groups_result = await db.execute(select(BotChat.chat_id))
+    group_ids = [row[0] for row in groups_result.all()]
 
-    # Send to all known groups
-    groups = await db.execute(select(BotChat.chat_id))
-    for (chat_id,) in groups.all():
-        await _post("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML")
-
-    # DM all users with telegram_id (except the new member themselves)
-    users = await db.execute(
+    users_result = await db.execute(
         select(User.telegram_id).where(
             User.telegram_id.is_not(None),
             User.telegram_id != user.telegram_id,
             User.status == "approved",
         )
     )
-    for (tg_id,) in users.all():
-        await _post("sendMessage", chat_id=tg_id, text=text, parse_mode="HTML")
+    user_tg_ids = [row[0] for row in users_result.all()]
+
+    all_recipients = group_ids + user_tg_ids
+
+    # Send with photo if available, otherwise plain text
+    photo_path = user.photo_path
+    if photo_path:
+        import os
+        full_path = os.path.join(settings.upload_dir, photo_path)
+        if os.path.exists(full_path):
+            for chat_id in all_recipients:
+                async with httpx.AsyncClient() as client:
+                    with open(full_path, "rb") as f:
+                        await client.post(
+                            f"{_BASE}/sendPhoto",
+                            data={"chat_id": chat_id, "caption": text, "parse_mode": "HTML"},
+                            files={"photo": f},
+                            timeout=15,
+                        )
+            return
+
+    for chat_id in all_recipients:
+        await _post("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML")
+
+
+async def notify_new_business(biz, owner, db: AsyncSession) -> None:
+    """Announce new business to all known groups and approved users."""
+    from app.models.bot_chat import BotChat
+    from app.models.user import User
+
+    biz_url = f"{settings.frontend_url}/businesses/{biz.id}"
+    owner_url = f"{settings.frontend_url}/profile/{owner.id}"
+    owner_name = f"{owner.first_name} {owner.last_name}".strip()
+
+    lines = [f"🏢 <b>Новый бизнес — {biz.name}</b>", ""]
+    if biz.category:
+        lines.append(f"📂 {biz.category.name_ru}")
+    if biz.city:
+        city_line = biz.city
+        if biz.country and biz.country != biz.city:
+            city_line += f", {biz.country}"
+        lines.append(f"📍 {city_line}")
+    if biz.description:
+        desc = biz.description[:300].rstrip()
+        if len(biz.description) > 300:
+            desc += "..."
+        lines.append(f"\n{desc}")
+    lines.append(f'\n👤 Владелец: <a href="{owner_url}">{owner_name}</a>')
+    lines.append(f'🔗 <a href="{biz_url}">{biz.name} в Lekion</a>')
+    text = "\n".join(lines)
+
+    groups_result = await db.execute(select(BotChat.chat_id))
+    group_ids = [row[0] for row in groups_result.all()]
+
+    users_result = await db.execute(
+        select(User.telegram_id).where(
+            User.telegram_id.is_not(None),
+            User.status == "approved",
+        )
+    )
+    user_tg_ids = [row[0] for row in users_result.all()]
+
+    for chat_id in group_ids + user_tg_ids:
+        await _post("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML")

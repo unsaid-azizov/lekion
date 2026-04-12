@@ -18,6 +18,7 @@ from app.schemas.business import (
     PhotoOut,
 )
 from app.services.search_service import apply_business_search, paginate
+from app.services.telegram_bot import notify_new_business
 from app.utils.images import delete_image, save_image
 
 router = APIRouter()
@@ -53,6 +54,7 @@ async def create_business(
     db.add(biz)
     await db.commit()
     await db.refresh(biz)
+    await notify_new_business(biz, user, db)
     return _serialize_business(biz)
 
 

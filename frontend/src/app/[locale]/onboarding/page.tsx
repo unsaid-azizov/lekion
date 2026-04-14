@@ -63,6 +63,7 @@ export default function OnboardingPage() {
         country: user.country || "",
         latitude: user.latitude ?? null,
         longitude: user.longitude ?? null,
+        location_precision: user.location_precision || "city",
       });
     }
   }, [user, router]);

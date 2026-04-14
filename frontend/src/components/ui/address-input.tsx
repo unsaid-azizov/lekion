@@ -155,7 +155,7 @@ export function reverseGeocode(lat: number, lng: number): Promise<AddressData | 
         latitude: lat,
         longitude: lng,
         display_name: data.display_name,
-        precision: (road) ? "address" : "city",
+        precision: (road ? "address" : "city") as "city" | "address",
       };
     })
     .catch(() => null);

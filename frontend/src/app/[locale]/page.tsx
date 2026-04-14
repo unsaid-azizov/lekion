@@ -2,11 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
-import { useAuthContext } from "@/components/providers";
-import { AuthButtons } from "@/components/auth/auth-buttons";
 import { MapContainer } from "@/components/map/map-container";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,9 +16,6 @@ type ViewTab = "people" | "businesses" | "map";
 
 export default function HomePage() {
   const t = useTranslations();
-  const locale = useLocale();
-  const router = useRouter();
-  const { user, loading } = useAuthContext();
   const [tab, setTab] = useState<ViewTab>("people");
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState<User[]>([]);
@@ -41,7 +35,6 @@ export default function HomePage() {
   const dataTab = tab === "map" ? "people" : tab;
 
   useEffect(() => {
-    if (!user || user.status !== "approved") return;
     const timer = setTimeout(async () => {
       try {
         if (dataTab === "people") {
@@ -56,11 +49,10 @@ export default function HomePage() {
       } catch {}
     }, 300);
     return () => clearTimeout(timer);
-  }, [user, dataTab, query]);
+  }, [dataTab, query]);
 
   const fetchPins = useCallback(
     async (bounds: { south: number; west: number; north: number; east: number }) => {
-      if (!user || user.status !== "approved") return;
       const params = new URLSearchParams({
         type: dataTab,
         south: String(bounds.south),
@@ -72,7 +64,7 @@ export default function HomePage() {
       const data = await api<MapPins>(`/map/pins?${params}`);
       setPins(data);
     },
-    [user, dataTab, query],
+    [dataTab, query],
   );
 
   const onDragStart = useCallback((e: React.MouseEvent) => {
@@ -103,59 +95,6 @@ export default function HomePage() {
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
   }, [mapWidth]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-3rem)]">
-        <div className="text-center px-4">
-          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-primary mb-4">LEKION</h1>
-          <div className="h-px w-16 bg-primary/40 mx-auto" />
-        </div>
-      </div>
-    );
-  }
-
-  if (user && user.status !== "approved") {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-3rem)]">
-        <div className="text-center px-4 max-w-md">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold mb-2">{t("pending.title")}</h2>
-          <p className="text-muted-foreground text-sm mb-6">{t("pending.message")}</p>
-          {(!user.bio || !user.profession || !user.city) ? (
-            <Button onClick={() => router.push("/onboarding")}>{t("pending.completeProfile")}</Button>
-          ) : (
-            <Button variant="outline" onClick={() => router.push("/profile")}>{t("pending.viewProfile")}</Button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    const subtitle = locale === "ru"
-      ? "Каталог лезгинских профессионалов и бизнесов. Находите специалистов, развивайте связи, поддерживайте своих."
-      : "A directory of Lezgin professionals and businesses. Find experts, build connections, support your community.";
-
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-3rem)]">
-        <div className="text-center px-4 max-w-lg">
-          <div className="mb-8">
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-primary mb-4">LEKION</h1>
-            <div className="h-px w-16 bg-primary/40 mx-auto mb-5" />
-            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-              {subtitle}
-            </p>
-          </div>
-          <AuthButtons />
-        </div>
-      </div>
-    );
-  }
 
   const isMobileMap = tab === "map";
 

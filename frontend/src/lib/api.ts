@@ -53,7 +53,8 @@ export async function api<T>(
   });
 
   if (res.status === 401) {
-    if (token) {
+    const hadToken = !!token;
+    if (hadToken) {
       const newToken = await refreshToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
@@ -66,7 +67,7 @@ export async function api<T>(
     }
     if (res.status === 401) {
       setToken(null);
-      if (typeof window !== "undefined") {
+      if (hadToken && typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
       }
       throw new Error("unauthorized");

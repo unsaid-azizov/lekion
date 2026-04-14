@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.core.deps import require_approved, require_member
+from app.core.deps import require_approved
 from app.database import get_db
 from app.models.business import Business, BusinessMember, BusinessPhoto
 from app.models.user import User
@@ -69,7 +69,6 @@ async def search_businesses(
     owner_id: uuid.UUID | None = None,
     page: int = 1,
     per_page: int = 20,
-    _: User = Depends(require_member),
     db: AsyncSession = Depends(get_db),
 ):
     tag_list = tags.split(",") if tags else None
@@ -93,7 +92,6 @@ async def search_businesses(
 @router.get("/{business_id}", response_model=BusinessOut)
 async def get_business(
     business_id: uuid.UUID,
-    _: User = Depends(require_member),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Business).where(Business.id == business_id))

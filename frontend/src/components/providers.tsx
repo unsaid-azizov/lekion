@@ -22,7 +22,9 @@ export function useAuthContext() {
 }
 
 const AUTH_PATHS = ["/auth/", "/onboarding", "/pending-approval"];
-// Pages blocked for incomplete users (personal profiles, own profile editing)
+// Pages that require any login (anonymous users redirected to login)
+const REQUIRE_LOGIN_PATHS = ["/profile", "/referrals", "/admin", "/businesses/new"];
+// Pages blocked for incomplete/pending/rejected users
 const APPROVED_ONLY_PATHS = ["/profile/", "/referrals"];
 
 function RouteGuard({ children }: { children: React.ReactNode }) {
@@ -40,9 +42,17 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => {
-    if (loading || !user) return;
+    if (loading) return;
     const isAuthPath = AUTH_PATHS.some((p) => pathname.includes(p));
     if (isAuthPath) return;
+
+    if (!user) {
+      const needsLogin =
+        REQUIRE_LOGIN_PATHS.some((p) => pathname.startsWith(p)) ||
+        pathname.includes("/edit");
+      if (needsLogin) router.replace("/auth/login");
+      return;
+    }
 
     if (user.status === "incomplete") {
       const isBlocked = APPROVED_ONLY_PATHS.some((p) => pathname.includes(p));

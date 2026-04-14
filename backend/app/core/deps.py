@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -12,6 +13,7 @@ from app.database import get_db
 from app.models.user import User
 
 bearer_scheme = HTTPBearer()
+bearer_scheme_optional = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
@@ -39,6 +41,23 @@ async def require_approved(user: User = Depends(get_current_user)) -> User:
     if user.status != "approved":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Account not approved")
     return user
+
+
+async def optional_auth(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme_optional),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[User]:
+    if not credentials:
+        return None
+    try:
+        payload = decode_token(credentials.credentials)
+    except JWTError:
+        return None
+    if await redis_client.is_blacklisted(payload["jti"]):
+        return None
+    user_id = uuid.UUID(payload["sub"])
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
 
 
 async def require_member(user: User = Depends(get_current_user)) -> User:

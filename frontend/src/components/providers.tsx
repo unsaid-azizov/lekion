@@ -23,7 +23,7 @@ export function useAuthContext() {
 
 const AUTH_PATHS = ["/auth/", "/onboarding", "/pending-approval"];
 // Pages that require any login (anonymous users redirected to login)
-const REQUIRE_LOGIN_PATHS = ["/profile", "/referrals", "/admin", "/businesses/new"];
+const REQUIRE_LOGIN_PATHS = ["/referrals", "/admin", "/businesses/new"];
 // Pages blocked for incomplete/pending/rejected users
 const APPROVED_ONLY_PATHS = ["/profile/", "/referrals"];
 

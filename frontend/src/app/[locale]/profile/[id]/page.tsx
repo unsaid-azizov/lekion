@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { use } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/providers";
 import { uploadsUrl } from "@/lib/utils";
-import { AuthButtons } from "@/components/auth/auth-buttons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { detectPlatform, PlatformIcon } from "@/lib/platforms";
 import type { User, Business, Project, UserLink as UserLinkType } from "@/types";
@@ -16,35 +14,17 @@ import type { User, Business, Project, UserLink as UserLinkType } from "@/types"
 export default function PublicProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const t = useTranslations();
-  const router = useRouter();
-  const { user: authUser, loading: authLoading } = useAuthContext();
+  const { loading: authLoading } = useAuthContext();
   const [user, setUser] = useState<User | null>(null);
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [authRequired, setAuthRequired] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
-    if (!authUser) {
-      setAuthRequired(true);
-      return;
-    }
     api<User>(`/users/${id}`).then(setUser).catch(() => {});
     api<{ items: Business[] }>(`/businesses?owner_id=${id}`)
       .then((data) => setBusinesses(data.items || []))
       .catch(() => {});
-  }, [id, authUser, authLoading]);
-
-  if (authRequired) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-3rem)]">
-        <div className="text-center px-4 max-w-sm">
-          <h2 className="text-xl font-semibold mb-2">{t("auth.loginRequired")}</h2>
-          <p className="text-muted-foreground text-sm mb-6">{t("auth.loginRequiredMessage")}</p>
-          <AuthButtons />
-        </div>
-      </div>
-    );
-  }
+  }, [id, authLoading]);
 
   if (!user) return null;
 

@@ -121,13 +121,13 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
       // Track seen coordinates to apply jitter for duplicates
       const seen = new Map<string, number>();
       const jitter = (lat: number, lng: number): [number, number] => {
-        const key = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+        // Group coords within ~1km as the same cluster
+        const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
         const count = seen.get(key) ?? 0;
         seen.set(key, count + 1);
-        if (count === 0) return [lat, lng];
-        // Spread duplicates in a small circle (~300m radius)
+        // Spread all pins (including the first) to avoid exact overlap
         const angle = (count * 137.5 * Math.PI) / 180; // golden angle spacing
-        const r = 0.003 * Math.sqrt(count);
+        const r = 0.05 * (Math.sqrt(count) + 0.5);
         return [lat + r * Math.cos(angle), lng + r * Math.sin(angle)];
       };
 

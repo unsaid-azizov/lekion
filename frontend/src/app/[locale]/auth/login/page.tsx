@@ -13,15 +13,7 @@ export default function LoginPage() {
   const { user } = useAuthContext();
 
   useEffect(() => {
-    if (user) {
-      if (user.status === "pending" && (!user.bio || !user.profession || !user.city)) {
-        router.push("/onboarding");
-      } else if (user.status === "pending") {
-        router.push("/pending-approval");
-      } else {
-        router.push("/");
-      }
-    }
+    if (user) router.push("/");
   }, [user, router]);
 
   return (

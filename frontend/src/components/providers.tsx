@@ -25,7 +25,7 @@ const AUTH_PATHS = ["/auth/", "/onboarding", "/pending-approval"];
 // Pages that require any login (anonymous users redirected to login)
 const REQUIRE_LOGIN_PATHS = ["/referrals", "/admin", "/businesses/new"];
 // Pages blocked for incomplete/pending/rejected users
-const APPROVED_ONLY_PATHS = ["/profile/", "/referrals"];
+const APPROVED_ONLY_PATHS = ["/referrals"];
 
 function RouteGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useContext(AuthContext);

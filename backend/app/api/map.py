@@ -51,6 +51,7 @@ async def get_pins(
                 name=f"{u.first_name} {u.last_name}",
                 profession=u.profession,
                 photo_path=u.photo_path,
+                precise=u.location_precision == "address",
             )
             for u in result.scalars()
         ]

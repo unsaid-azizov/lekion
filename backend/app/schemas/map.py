@@ -10,6 +10,7 @@ class PersonPin(BaseModel):
     name: str
     profession: str | None = None
     photo_path: str | None = None
+    precise: bool = False
 
 
 class BusinessPin(BaseModel):

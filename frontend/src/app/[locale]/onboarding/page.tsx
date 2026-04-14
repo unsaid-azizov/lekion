@@ -32,6 +32,7 @@ export default function OnboardingPage() {
     country: "",
     latitude: null as number | null,
     longitude: null as number | null,
+    location_precision: "city" as "city" | "address",
   });
   const [submitting, setSubmitting] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -221,7 +222,7 @@ export default function OnboardingPage() {
             <Label className="text-xs">{t("profile.city")} *</Label>
             <AddressInput
               value={[form.city, form.country].filter(Boolean).join(", ")}
-              onChange={(data: AddressData) => setForm((prev) => ({ ...prev, city: data.city, country: data.country, latitude: data.latitude ?? null, longitude: data.longitude ?? null }))}
+              onChange={(data: AddressData) => setForm((prev) => ({ ...prev, city: data.city, country: data.country, latitude: data.latitude ?? null, longitude: data.longitude ?? null, location_precision: data.precision }))}
               placeholder={t("onboarding.cityPlaceholder")}
             />
           </div>

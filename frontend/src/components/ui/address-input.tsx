@@ -28,6 +28,7 @@ export interface AddressData {
   latitude?: number;
   longitude?: number;
   display_name?: string;
+  precision: "city" | "address";
 }
 
 interface Props {
@@ -86,6 +87,7 @@ export function AddressInput({ value, onChange, placeholder = "Начните в
       latitude: parseFloat(result.lat),
       longitude: parseFloat(result.lon),
       display_name: result.display_name,
+      precision: (a.road || a.pedestrian) ? "address" : "city",
     });
   }, [onChange]);
 
@@ -153,6 +155,7 @@ export function reverseGeocode(lat: number, lng: number): Promise<AddressData | 
         latitude: lat,
         longitude: lng,
         display_name: data.display_name,
+        precision: (road) ? "address" : "city",
       };
     })
     .catch(() => null);

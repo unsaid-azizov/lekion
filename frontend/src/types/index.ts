@@ -9,6 +9,7 @@ export interface User {
   photo_path?: string;
   latitude?: number;
   longitude?: number;
+  location_precision?: "city" | "address";
   city?: string;
   country?: string;
   phone?: string;
@@ -100,6 +101,7 @@ export interface PersonPin {
   name: string;
   profession?: string;
   photo_path?: string;
+  precise?: boolean;
 }
 
 export interface BusinessPin {

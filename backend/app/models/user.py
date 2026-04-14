@@ -27,6 +27,7 @@ class User(Base):
 
     latitude: Mapped[float | None] = mapped_column(Float)
     longitude: Mapped[float | None] = mapped_column(Float)
+    location_precision: Mapped[str] = mapped_column(String(20), default="city")
     city: Mapped[str | None] = mapped_column(String(200))
     country: Mapped[str | None] = mapped_column(String(100))
 

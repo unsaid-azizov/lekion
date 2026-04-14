@@ -132,7 +132,7 @@ export function MapContainer({ pins, onBoundsChange }: Props) {
       };
 
       for (const p of pins.people) {
-        const [lat, lng] = jitter(p.lat, p.lng);
+        const [lat, lng] = p.precise ? [p.lat, p.lng] : jitter(p.lat, p.lng);
         L.marker([lat, lng], { icon: iconsRef.current!.person })
           .bindPopup(`<b>${p.name}</b><br/>${p.profession || ""}`)
           .addTo(layerRef.current!);

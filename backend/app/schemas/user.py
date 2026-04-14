@@ -12,6 +12,7 @@ class UserUpdate(BaseModel):
     bio: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    location_precision: str | None = None
     city: str | None = None
     country: str | None = None
     phone: str | None = None
@@ -80,6 +81,7 @@ class UserOut(BaseModel):
     photo_path: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    location_precision: str = "city"
     city: str | None = None
     country: str | None = None
     phone: str | None = None

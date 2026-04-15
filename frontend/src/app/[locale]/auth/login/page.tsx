@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/components/providers";
@@ -25,9 +26,17 @@ export default function LoginPage() {
             {t("loginSubtitle")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pb-8 pt-4">
+        <CardContent className="pb-6 pt-4">
           <AuthButtons />
         </CardContent>
+        <div className="border-t border-border/50 px-6 py-3 flex justify-center gap-4">
+          <Link href="/terms" className="text-[11px] text-muted-foreground hover:text-primary transition-colors">
+            Пользовательское соглашение
+          </Link>
+          <Link href="/privacy" className="text-[11px] text-muted-foreground hover:text-primary transition-colors">
+            Политика конфиденциальности
+          </Link>
+        </div>
       </Card>
     </div>
   );

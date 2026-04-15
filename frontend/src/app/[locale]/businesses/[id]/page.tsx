@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 import { uploadsUrl } from "@/lib/utils";
@@ -24,10 +25,18 @@ export default function BusinessDetailPage({ params }: { params: Promise<{ id: s
   const { id } = use(params);
   const t = useTranslations();
   const { user } = useAuthContext();
+  const router = useRouter();
   const [business, setBusiness] = useState<Business | null>(null);
 
   const fetchBusiness = () => {
     api<Business>(`/businesses/${id}`).then(setBusiness);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Снять с публикации «${business?.name}»? Бизнес исчезнет из каталога.`)) return;
+    await api(`/businesses/${id}`, { method: "DELETE" });
+    toast.success("Бизнес снят с публикации");
+    router.push("/profile");
   };
 
   useEffect(() => {
@@ -54,9 +63,16 @@ export default function BusinessDetailPage({ params }: { params: Promise<{ id: s
               </div>
             </div>
             {isMember && (
-              <Link href={`/businesses/${id}/edit`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-                {t("common.edit")}
-              </Link>
+              <div className="flex gap-2">
+                <Link href={`/businesses/${id}/edit`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                  {t("common.edit")}
+                </Link>
+                {isOwner && (
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={handleDelete}>
+                    Снять с публикации
+                  </Button>
+                )}
+              </div>
             )}
           </div>
           <div className="flex flex-wrap gap-1 mt-2">

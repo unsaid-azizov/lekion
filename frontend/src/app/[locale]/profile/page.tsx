@@ -227,7 +227,7 @@ function LinkItem({ link, onChanged }: { link: UserLinkType; onChanged: () => vo
           {link.url.replace(/^https?:\/\//, "")}
         </a>
       </div>
-      <button onClick={handleDelete} className="text-muted-foreground/40 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all p-1 rounded-md hover:bg-muted shrink-0">
+      <button onClick={handleDelete} className="text-muted-foreground/40 hover:text-destructive transition-colors p-1 rounded-md hover:bg-muted shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -436,7 +436,7 @@ function ProjectCard({ project, onChanged, editable }: { project: Project; onCha
       )}
 
       {editable && (
-        <button onClick={handleDelete} className="absolute top-3 right-3 text-muted-foreground/40 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all p-1 rounded-md hover:bg-muted">
+        <button onClick={handleDelete} className="absolute top-3 right-3 text-muted-foreground/40 hover:text-destructive transition-colors p-1 rounded-md hover:bg-muted">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       )}

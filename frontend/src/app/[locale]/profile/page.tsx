@@ -450,11 +450,14 @@ function BusinessList({ userId }: { userId: string }) {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  if (!loaded) {
+  const load = () =>
     api<{ items: Business[] }>(`/businesses?owner_id=${userId}`)
       .then((data) => setBusinesses(data.items || []))
       .catch(() => {})
       .finally(() => setLoaded(true));
+
+  if (!loaded) {
+    load();
     return null;
   }
 
@@ -469,18 +472,39 @@ function BusinessList({ userId }: { userId: string }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {businesses.map((biz) => (
-        <Link key={biz.id} href={`/businesses/${biz.id}`} className="group rounded-xl border border-border bg-muted/30 p-4 hover:border-primary/30 hover:shadow-[0_0_30px_rgba(201,168,124,0.08)] transition-all duration-300 block">
-          <div className="flex items-start gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            </div>
-            <div className="min-w-0">
-              <p className="font-semibold text-sm">{biz.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{biz.address}</p>
-            </div>
-          </div>
-        </Link>
+        <BusinessCard key={biz.id} biz={biz} onDeleted={load} />
       ))}
+    </div>
+  );
+}
+
+function BusinessCard({ biz, onDeleted }: { biz: Business; onDeleted: () => void }) {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!confirm(`Удалить бизнес «${biz.name}»?`)) return;
+    await api(`/businesses/${biz.id}`, { method: "DELETE" });
+    onDeleted();
+  };
+
+  return (
+    <div className="relative group rounded-xl border border-border bg-muted/30 hover:border-primary/30 hover:shadow-[0_0_30px_rgba(201,168,124,0.08)] transition-all duration-300">
+      <Link href={`/businesses/${biz.id}`} className="block p-4">
+        <div className="flex items-start gap-3 pr-6">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-sm">{biz.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{biz.address}</p>
+          </div>
+        </div>
+      </Link>
+      <button
+        onClick={handleDelete}
+        className="absolute top-3 right-3 text-muted-foreground/40 hover:text-destructive transition-colors p-1 rounded-md hover:bg-muted"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
   );
 }

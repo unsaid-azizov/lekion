@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/components/providers";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
@@ -35,6 +36,7 @@ export function AuthButtons({ referralCode }: { referralCode?: string }) {
   const t = useTranslations("auth");
   const { googleLogin } = useAuthContext();
   const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const { prompt: googlePrompt } = useGoogleAuth(async (credential) => {
     setLoading(true);
@@ -54,16 +56,30 @@ export function AuthButtons({ referralCode }: { referralCode?: string }) {
 
   return (
     <div className="space-y-3 w-full max-w-xs mx-auto">
-      <button onClick={googlePrompt} disabled={loading} className={BTN}>
+      <button onClick={googlePrompt} disabled={loading || !agreed} className={BTN}>
         <GoogleIcon />
         {loading ? t("loading") : t("continueWithGoogle")}
       </button>
       {YANDEX_CLIENT_ID && (
-        <button onClick={handleYandex} disabled={loading} className={BTN}>
+        <button onClick={handleYandex} disabled={loading || !agreed} className={BTN}>
           <YandexIcon />
           Продолжить с Яндекс
         </button>
       )}
+      <label className="flex items-start gap-2 cursor-pointer pt-1">
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          className="mt-0.5 shrink-0 accent-primary"
+        />
+        <span className="text-xs text-muted-foreground leading-relaxed">
+          Я принимаю{" "}
+          <Link href="/privacy" className="text-primary underline underline-offset-2 hover:text-primary/80">
+            политику конфиденциальности
+          </Link>
+        </span>
+      </label>
     </div>
   );
 }

@@ -75,6 +75,10 @@ export function AuthButtons({ referralCode }: { referralCode?: string }) {
         />
         <span className="text-xs text-muted-foreground leading-relaxed">
           Я принимаю{" "}
+          <Link href="/terms" className="text-primary underline underline-offset-2 hover:text-primary/80">
+            пользовательское соглашение
+          </Link>{" "}
+          и{" "}
           <Link href="/privacy" className="text-primary underline underline-offset-2 hover:text-primary/80">
             политику конфиденциальности
           </Link>

@@ -105,19 +105,28 @@ async def telegram_webhook(request: Request):
             await _post("sendMessage", chat_id=chat["id"], text="❌ Неверный пароль.")
             return {"ok": True}
 
-        # Find user by telegram_id
+        # Find user by telegram_id, or by approved account without one yet
         result = await db.execute(select(User).where(User.telegram_id == sender_tg_id))
         user = result.scalar_one_or_none()
 
         if not user:
-            await _post(
-                "sendMessage",
-                chat_id=chat["id"],
-                text="❌ Аккаунт не найден. Сначала войдите на сайте через Telegram.",
+            # Auto-link: find first approved account without telegram_id
+            result2 = await db.execute(
+                select(User)
+                .where(User.telegram_id.is_(None), User.status == "approved")
+                .order_by(User.created_at.asc())
+                .limit(1)
             )
-            return {"ok": True}
+            user = result2.scalar_one_or_none()
+            if not user:
+                await _post("sendMessage", chat_id=chat["id"],
+                            text=f"❌ Нет аккаунтов для привязки. Ваш TG ID: <code>{sender_tg_id}</code>",
+                            parse_mode="HTML")
+                return {"ok": True}
+            user.telegram_id = sender_tg_id
 
         if user.role == "admin":
+            await db.commit()
             await _post("sendMessage", chat_id=chat["id"], text="✅ Вы уже администратор.")
             return {"ok": True}
 

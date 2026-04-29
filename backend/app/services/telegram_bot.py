@@ -17,46 +17,44 @@ async def _post(method: str, **kwargs) -> dict:
 
 
 async def notify_admin_new_application(user, db: AsyncSession) -> None:
-    """Send all admins with telegram_id a new application notification."""
-    from app.models.user import User
-    import os
+    """Send new application notification to all registered bot chats (groups)."""
+    from app.models.bot_chat import BotChat
+    import json, os
 
-    result = await db.execute(
-        select(User.telegram_id).where(User.role == "admin", User.telegram_id.is_not(None))
-    )
-    admin_ids = [row[0] for row in result.all()]
-    if not admin_ids:
+    result = await db.execute(select(BotChat.chat_id))
+    chat_ids = [row[0] for row in result.all()]
+    if not chat_ids:
         return
 
     profile_url = f"{settings.frontend_url}/profile/{user.id}"
-    text = _build_intro(user, profile_url)
-    text = f"📋 <b>Новая заявка на вступление</b>\n\n" + text
-
-    markup = {
-        "inline_keyboard": [[
-            {"text": "✅ Одобрить", "callback_data": f"approve:{user.id}"},
-            {"text": "❌ Отклонить", "callback_data": f"reject:{user.id}"},
-        ]]
-    }
+    text = "📋 <b>Новая заявка на вступление</b>\n\n" + _build_intro(user, profile_url)
+    markup = json.dumps({"inline_keyboard": [[
+        {"text": "✅ Одобрить", "callback_data": f"approve:{user.id}"},
+        {"text": "❌ Отклонить", "callback_data": f"reject:{user.id}"},
+    ]]})
 
     photo_path = user.photo_path
     if photo_path:
         full_path = os.path.join(settings.upload_dir, photo_path)
         if os.path.exists(full_path):
-            for chat_id in admin_ids:
+            for chat_id in chat_ids:
                 async with httpx.AsyncClient() as client:
                     with open(full_path, "rb") as f:
                         await client.post(
                             f"{_BASE}/sendPhoto",
-                            data={"chat_id": chat_id, "caption": text, "parse_mode": "HTML",
-                                  "reply_markup": __import__("json").dumps(markup)},
+                            data={"chat_id": chat_id, "caption": text,
+                                  "parse_mode": "HTML", "reply_markup": markup},
                             files={"photo": f},
                             timeout=15,
                         )
             return
 
-    for chat_id in admin_ids:
-        await _post("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML", reply_markup=markup)
+    for chat_id in chat_ids:
+        await _post("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML",
+                    reply_markup={"inline_keyboard": [[
+                        {"text": "✅ Одобрить", "callback_data": f"approve:{user.id}"},
+                        {"text": "❌ Отклонить", "callback_data": f"reject:{user.id}"},
+                    ]]})
 
 
 async def notify_user_approved(user) -> None:
